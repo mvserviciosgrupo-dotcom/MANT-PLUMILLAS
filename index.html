@@ -1,0 +1,1907 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>SGM Industrial — Pacasmayo</title>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.min.js"></script>
+<style>
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=IBM+Plex+Mono:wght@400;500&display=swap');
+
+:root {
+  --bg:   #f2f3f5;
+  --bg1:  #ffffff;
+  --bg2:  #f7f8fa;
+  --bg3:  #edf0f3;
+  --bg4:  #e4e8ed;
+  --b1:   #dde1e8;
+  --b2:   #c4cad5;
+  --b3:   #a0a8b5;
+  --ac:   #cc1a1a;  --ac2: #a81414;  --ac-s: rgba(204,26,26,.07);
+  --gr:   #1a7a45;  --gr-s: rgba(26,122,69,.08);
+  --am:   #c06010;  --am-s: rgba(192,96,16,.08);
+  --rd:   #cc1a1a;  --rd-s: rgba(204,26,26,.08);
+  --pu:   #6a40c0;  --pu-s: rgba(106,64,192,.08);
+  --cy:   #1a5fa0;  --cy-s: rgba(26,95,160,.08);
+  --t1:   #1a1d23;  --t2:   #4a5568;  --t3:   #8898aa;
+  --r:6px; --r2:10px; --r3:14px;
+  --sh: 0 1px 3px rgba(0,0,0,.06), 0 2px 10px rgba(0,0,0,.04);
+  --sh2: 0 4px 20px rgba(0,0,0,.10);
+}
+
+*, *::before, *::after { margin:0; padding:0; box-sizing:border-box; }
+html { scroll-behavior: smooth; }
+body { font-family:'Inter',system-ui,sans-serif; background:var(--bg); color:var(--t1); min-height:100vh; font-size:13.5px; line-height:1.55; -webkit-font-smoothing:antialiased; }
+
+::-webkit-scrollbar { width:5px; height:5px; }
+::-webkit-scrollbar-track { background:var(--bg); }
+::-webkit-scrollbar-thumb { background:var(--b2); border-radius:3px; }
+
+/* ──────── HEADER ──────── */
+header {
+  background: #1a1d23;
+  border-bottom: 3px solid var(--ac);
+  padding: 0 28px;
+  height: 58px;
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  position: sticky;
+  top: 0;
+  z-index: 300;
+  box-shadow: 0 2px 16px rgba(0,0,0,.28);
+}
+/* logo replaced by <img> */
+.htitle { font-size:.84rem; font-weight:600; color:#ffffff; letter-spacing:-.1px; }
+.hsub   { font-size:.64rem; color:rgba(255,255,255,.38); margin-top:1px; letter-spacing:.3px; text-transform:uppercase; }
+.hright { margin-left:auto; display:flex; align-items:center; gap:10px; }
+.hdate  { font-size:.65rem; color:rgba(255,255,255,.38); font-family:'IBM Plex Mono',monospace; }
+.honline { display:flex; align-items:center; gap:5px; font-size:.65rem; color:#4ecf90; font-weight:600; letter-spacing:.3px; }
+.hdot   { width:5px; height:5px; border-radius:50%; background:var(--gr); animation:bl 2.8s ease-in-out infinite; }
+@keyframes bl { 0%,100%{opacity:1} 50%{opacity:.25} }
+
+/* ──────── NAV ──────── */
+nav {
+  background: #ffffff;
+  border-bottom: 1px solid var(--b1);
+  box-shadow: 0 1px 4px rgba(0,0,0,.06);
+  display: flex;
+  overflow-x: auto;
+  scrollbar-width: none;
+}
+nav::-webkit-scrollbar { display:none; }
+.nb {
+  padding: 0 14px; height: 38px;
+  background: none; border: none;
+  border-bottom: 2px solid transparent;
+  color: var(--t3);
+  font-family: 'Inter',sans-serif; font-size:.74rem; font-weight:500;
+  cursor: pointer; white-space: nowrap;
+  transition: all .15s;
+  display: flex; align-items: center; gap:5px;
+}
+.nb:hover  { color:var(--t1); background:var(--bg2); }
+.nb.active { color:var(--ac); border-bottom-color:var(--ac); background:var(--ac-s); }
+
+/* ──────── MAIN ──────── */
+main { padding:16px; max-width:1360px; margin:0 auto; }
+.tab { display:none; }
+.tab.active { display:block; }
+.ph { display:flex; align-items:baseline; justify-content:space-between; margin-bottom:14px; flex-wrap:wrap; gap:8px; }
+.ph h2 { font-size:.88rem; font-weight:600; color:var(--t1); letter-spacing:-.2px; }
+.ph p  { font-size:.68rem; color:var(--t3); }
+
+/* ──────── CARD ──────── */
+.card { background:var(--bg1); border:1px solid var(--b1); border-radius:var(--r3); padding:16px; box-shadow:var(--sh); }
+.ct   { font-size:.64rem; font-weight:600; color:var(--t3); text-transform:uppercase; letter-spacing:.8px; margin-bottom:12px; padding-bottom:9px; border-bottom:1px solid var(--b1); display:flex; align-items:center; gap:6px; }
+
+/* ──────── KPI ──────── */
+.krow { display:grid; grid-template-columns:repeat(auto-fit,minmax(130px,1fr)); gap:8px; margin-bottom:13px; }
+.kpi  { background:var(--bg2); border:1px solid var(--b1); border-radius:var(--r2); padding:13px 14px; position:relative; overflow:hidden; transition:border-color .2s; }
+.kpi:hover { border-color:var(--b2); }
+.kl   { font-size:.61rem; color:var(--t3); font-weight:500; text-transform:uppercase; letter-spacing:.5px; }
+.kv   { font-size:1.45rem; font-weight:700; color:var(--t1); margin:4px 0 2px; font-family:'IBM Plex Mono',monospace; line-height:1; }
+.ks   { font-size:.61rem; color:var(--t3); }
+.kb   { position:absolute; bottom:0; left:0; height:2px; width:100%; }
+.kb-b{background:var(--ac)}.kb-g{background:var(--gr)}.kb-a{background:var(--am)}.kb-r{background:var(--rd)}.kb-p{background:var(--pu)}
+
+/* ──────── FLEET ──────── */
+.fleet-grid { display:grid; grid-template-columns:repeat(auto-fill,minmax(145px,1fr)); gap:7px; }
+.fc { background:var(--bg2); border:1px solid var(--b1); border-radius:var(--r2); padding:10px 12px; cursor:pointer; transition:all .15s; }
+.fc:hover  { border-color:var(--b2); background:var(--bg3); }
+.fc.mant   { border-color:rgba(217,146,14,.25); }
+.fc-ab { font-size:.62rem; font-weight:700; color:var(--ac); font-family:'IBM Plex Mono',monospace; letter-spacing:1px; margin-bottom:4px; }
+.fc-nm { font-size:.77rem; font-weight:600; color:var(--t1); margin-bottom:2px; }
+.fc-ct { font-size:.63rem; color:var(--t3); }
+.fst   { display:inline-flex; align-items:center; gap:3px; margin-top:6px; padding:2px 7px; border-radius:20px; font-size:.59rem; font-weight:600; }
+.op    { background:var(--gr-s); color:var(--gr); }
+.mn    { background:var(--am-s); color:var(--am); }
+
+/* ──────── ACTIVITY ──────── */
+.ai    { display:flex; gap:9px; padding:8px 0; border-bottom:1px solid var(--b1); }
+.ai:last-child { border-bottom:none; }
+.adot  { width:6px; height:6px; border-radius:50%; margin-top:5px; flex-shrink:0; }
+.ab{background:var(--ac)}.aa{background:var(--am)}.ar{background:var(--rd)}
+.at1   { font-size:.78rem; font-weight:500; color:var(--t1); }
+.at2   { font-size:.64rem; color:var(--t3); margin-top:1px; }
+.atm   { font-size:.61rem; color:var(--t3); white-space:nowrap; font-family:'IBM Plex Mono',monospace; }
+
+/* ──────── NEXT MAINT ──────── */
+.nmi { display:flex; align-items:center; gap:11px; padding:10px 12px; background:var(--bg2); border:1px solid var(--b1); border-radius:var(--r2); margin-bottom:6px; flex-wrap:wrap; }
+.nml { flex:1; min-width:175px; }
+.nmu { font-size:.8rem; font-weight:600; color:var(--t1); }
+.nmd { font-size:.65rem; color:var(--t3); margin-top:2px; }
+.chip { padding:3px 9px; border-radius:20px; font-size:.64rem; font-weight:600; font-family:'IBM Plex Mono',monospace; white-space:nowrap; }
+.cok{background:var(--gr-s);color:var(--gr)}
+.cwn{background:var(--am-s);color:var(--am)}
+.cur{background:var(--rd-s);color:var(--rd)}
+.pbg  { height:3px; background:rgba(0,0,0,.06); border-radius:2px; margin-top:5px; overflow:hidden; }
+.pbf  { height:100%; border-radius:2px; transition:width .5s; }
+.pok{background:var(--gr)}.pwn{background:var(--am)}.pur{background:var(--rd)}
+
+/* ──────── FORM ──────── */
+.fg  { display:flex; flex-direction:column; gap:4px; }
+.fl  { font-size:.67rem; font-weight:500; color:var(--t2); }
+input,select,textarea {
+  background:var(--bg2); border:1px solid var(--b1); border-radius:var(--r);
+  padding:7px 10px; color:var(--t1); font-family:'Inter',sans-serif; font-size:.81rem; width:100%;
+  transition:border-color .15s, box-shadow .15s;
+}
+input:focus,select:focus,textarea:focus {
+  outline:none; border-color:var(--ac);
+  box-shadow:0 0 0 3px rgba(204,26,26,.10);
+}
+input::placeholder,textarea::placeholder { color:var(--t3); }
+select option { background:var(--bg2); }
+textarea { min-height:76px; resize:vertical; line-height:1.6; }
+.hint { font-size:.62rem; color:var(--t3); margin-top:2px; }
+.gg   { display:grid; gap:10px; }
+.g2   { grid-template-columns:1fr 1fr; }
+.g3   { grid-template-columns:1fr 1fr 1fr; }
+.g4   { grid-template-columns:1fr 1fr 1fr 1fr; }
+.full { grid-column:1/-1; }
+
+/* Radio styled */
+.rrow { display:flex; gap:6px; flex-wrap:wrap; }
+.rb   { display:flex; align-items:center; gap:5px; padding:6px 10px; border:1px solid var(--b1); border-radius:var(--r); cursor:pointer; font-size:.77rem; color:var(--t2); transition:all .15s; }
+.rb input[type=radio] { accent-color:var(--ac); width:11px; height:11px; }
+.rb:has(input:checked) { border-color:var(--ac); background:var(--ac-s); color:var(--ac); font-weight:500; }
+
+/* Computed */
+.comp { display:flex; align-items:center; gap:8px; padding:7px 10px; background:var(--bg); border:1px solid var(--b1); border-radius:var(--r); min-height:34px; }
+
+/* Section divider */
+.dv { border:none; border-top:1px solid var(--b1); margin:14px 0; }
+
+/* Sub card */
+.sc  { background:var(--bg); border:1px solid var(--b1); border-radius:var(--r2); padding:13px 14px; }
+.sct { font-size:.64rem; font-weight:600; color:var(--t3); text-transform:uppercase; letter-spacing:.6px; margin-bottom:10px; display:flex; align-items:center; gap:5px; }
+
+/* Próximo resultado */
+.prx-grid { display:grid; grid-template-columns:1fr 1fr 1fr; gap:8px; margin-top:12px; }
+.prx-box  { background:var(--bg1); border:1px solid var(--b1); border-radius:var(--r); padding:11px; text-align:center; }
+.prx-l    { font-size:.6rem; color:var(--t3); text-transform:uppercase; letter-spacing:.4px; margin-bottom:4px; }
+.prx-v    { font-size:.95rem; font-weight:700; font-family:'IBM Plex Mono',monospace; }
+
+/* Photos */
+.pz  { border:1px dashed var(--b2); border-radius:var(--r); padding:16px; text-align:center; cursor:pointer; transition:all .15s; }
+.pz:hover { border-color:var(--ac); background:var(--ac-s); }
+.pz input { display:none; }
+.ppvs { display:flex; gap:7px; flex-wrap:wrap; margin-top:9px; }
+.pp   { position:relative; width:72px; height:72px; border-radius:var(--r); overflow:hidden; border:1px solid var(--b1); }
+.pp img  { width:100%; height:100%; object-fit:cover; cursor:pointer; }
+.ppdel { position:absolute; top:2px; right:2px; background:rgba(217,69,69,.92); color:#fff; border:none; border-radius:3px; width:14px; height:14px; font-size:8px; cursor:pointer; display:flex; align-items:center; justify-content:center; }
+
+/* Buttons */
+.btn { padding:7px 14px; border:none; border-radius:var(--r); font-family:'Inter',sans-serif; font-size:.77rem; font-weight:500; cursor:pointer; transition:all .15s; display:inline-flex; align-items:center; gap:5px; }
+.bp  { background:var(--ac); color:#fff; }
+.bp:hover { background:var(--ac2); box-shadow:0 0 14px rgba(74,120,240,.35); }
+.bg  { background:transparent; border:1px solid var(--b1); color:var(--t2); }
+.bg:hover { border-color:var(--b2); color:var(--t1); }
+.bd  { background:transparent; border:1px solid var(--b1); color:var(--rd); }
+.bd:hover { background:var(--rd-s); }
+.bsm { padding:4px 9px; font-size:.7rem; }
+.brow { display:flex; gap:7px; justify-content:flex-end; flex-wrap:wrap; margin-top:16px; }
+
+/* Table */
+.tw  { overflow-x:auto; border-radius:var(--r2); border:1px solid var(--b1); }
+table { width:100%; border-collapse:collapse; font-size:.75rem; }
+th   { background:var(--bg2); padding:8px 10px; text-align:left; font-size:.61rem; font-weight:600; color:var(--t3); text-transform:uppercase; letter-spacing:.5px; border-bottom:1px solid var(--b1); white-space:nowrap; }
+td   { padding:7px 10px; border-bottom:1px solid var(--b1); vertical-align:middle; color:var(--t2); }
+tr:last-child td { border-bottom:none; }
+tr:hover td { background:var(--bg2); }
+
+/* Badge */
+.bdg { display:inline-flex; align-items:center; padding:2px 7px; border-radius:20px; font-size:.6rem; font-weight:600; letter-spacing:.2px; white-space:nowrap; }
+.bdb{background:rgba(26,95,160,.10);color:#1a5fa0}
+.bda{background:var(--am-s);color:var(--am)}
+.bdr{background:var(--rd-s);color:var(--rd)}
+.bdg2{background:var(--gr-s);color:var(--gr)}
+.bdp{background:var(--pu-s);color:var(--pu)}
+.bds{background:rgba(90,110,140,.12);color:var(--t3)}
+
+/* Filters */
+.fbar { display:flex; gap:8px; flex-wrap:wrap; margin-bottom:11px; }
+.fbar input,.fbar select { flex:1; min-width:130px; }
+
+/* Unit filter chips */
+.kf  { display:flex; gap:5px; flex-wrap:wrap; margin-bottom:12px; }
+.kfb { padding:4px 11px; border-radius:20px; border:1px solid var(--b1); background:none; color:var(--t3); font-size:.7rem; font-weight:500; cursor:pointer; transition:all .15s; }
+.kfb.active { background:var(--ac); color:#fff; border-color:var(--ac); }
+.kfb:hover:not(.active) { border-color:var(--b2); color:var(--t2); }
+
+/* ──────── STATS CHART AREA ──────── */
+.stat-tabs { display:flex; gap:0; margin-bottom:0; border-bottom:1px solid var(--b1); }
+.stab {
+  padding:9px 18px; background:none; border:none;
+  border-bottom:2px solid transparent;
+  color:var(--t3); font-family:'Inter',sans-serif; font-size:.75rem; font-weight:500;
+  cursor:pointer; transition:all .15s; white-space:nowrap;
+}
+.stab:hover  { color:var(--t1); }
+.stab.active { color:var(--ac); border-bottom-color:var(--ac); }
+
+.stat-panel { display:none; padding-top:16px; }
+.stat-panel.active { display:block; }
+
+/* Metric toggle */
+.mtoggle { display:flex; gap:5px; }
+.mtb {
+  padding:4px 12px; border:1px solid var(--b1); border-radius:20px;
+  background:none; color:var(--t3); font-size:.69rem; font-weight:500;
+  cursor:pointer; transition:all .15s;
+}
+.mtb.active { background:var(--bg3); border-color:var(--b2); color:var(--t1); }
+.mtb:hover:not(.active) { border-color:var(--b2); color:var(--t2); }
+
+/* Chart containers */
+.chart-main  { background:var(--bg1); border:1px solid var(--b1); border-radius:var(--r3); padding:16px; margin-bottom:14px; }
+.chart-head  { display:flex; align-items:center; justify-content:space-between; flex-wrap:wrap; gap:8px; margin-bottom:14px; }
+.chart-title { font-size:.68rem; font-weight:600; color:var(--t2); text-transform:uppercase; letter-spacing:.7px; }
+
+/* Day picker */
+.day-picker { display:flex; align-items:center; gap:8px; margin-bottom:12px; }
+.day-picker label { font-size:.65rem; color:var(--t3); }
+.day-picker input { width:160px; }
+
+/* Mini charts grid — 2×2 */
+.mini-grid { display:grid; grid-template-columns:1fr 1fr; gap:12px; margin-bottom:14px; }
+.mini-box  { background:var(--bg2); border:1px solid var(--b1); border-radius:var(--r2); padding:13px; }
+.mini-ttl  { font-size:.63rem; font-weight:600; color:var(--t3); text-transform:uppercase; letter-spacing:.6px; margin-bottom:11px; }
+
+/* Modal */
+.ov { display:none; position:fixed; inset:0; background:rgba(0,0,0,.45); z-index:400; align-items:center; justify-content:center; padding:14px; backdrop-filter:blur(4px); }
+.ov.open { display:flex; }
+.modal { background:var(--bg1); border:1px solid var(--b2); border-radius:var(--r3); padding:20px; width:100%; max-width:660px; max-height:90vh; overflow-y:auto; box-shadow:var(--sh2); }
+.mhd   { display:flex; justify-content:space-between; align-items:center; margin-bottom:14px; }
+.mttl  { font-size:.86rem; font-weight:600; color:var(--t1); }
+.mcls  { background:none; border:none; color:var(--t3); font-size:1rem; cursor:pointer; padding:3px 6px; border-radius:4px; }
+.mcls:hover { background:var(--rd-s); color:var(--rd); }
+
+/* Detail grid */
+.dg  { display:grid; grid-template-columns:1fr 1fr; gap:10px; margin-bottom:12px; }
+.dgi label { font-size:.61rem; font-weight:500; color:var(--t3); text-transform:uppercase; display:block; margin-bottom:2px; }
+.dgv { font-size:.79rem; color:var(--t1); }
+
+/* Calendar */
+.cal-hdr { display:flex; align-items:center; justify-content:space-between; margin-bottom:11px; }
+.cal-m   { font-size:.84rem; font-weight:600; color:var(--t1); }
+.cal-g   { display:grid; grid-template-columns:repeat(7,1fr); gap:2px; }
+.cal-dl  { text-align:center; font-size:.59rem; font-weight:600; color:var(--t3); padding:4px 0; text-transform:uppercase; }
+.cal-c   { background:var(--bg2); border:1px solid var(--b1); border-radius:5px; min-height:68px; padding:4px 5px; }
+.cal-c.today { border-color:rgba(204,26,26,.45); background:rgba(204,26,26,.03); }
+.cal-c.other { opacity:.22; }
+.cal-n   { font-size:.67rem; color:var(--t3); margin-bottom:3px; font-family:'IBM Plex Mono',monospace; }
+.ce      { padding:1px 4px; border-radius:3px; font-size:.56rem; font-weight:500; overflow:hidden; text-overflow:ellipsis; white-space:nowrap; margin-bottom:2px; }
+.cep{background:rgba(74,120,240,.2);color:#7aa2f7}
+.cec{background:rgba(217,146,14,.2);color:var(--am)}
+.cee{background:rgba(217,69,69,.2);color:var(--rd)}
+
+/* Obs */
+.obs-item { background:var(--bg1); border:1px solid var(--b1); border-radius:var(--r2); padding:11px 13px; margin-bottom:7px; }
+.obs-item.crit { border-left:3px solid var(--rd); }
+.obs-item.adv  { border-left:3px solid var(--am); }
+.obs-item.inf  { border-left:3px solid var(--ac); }
+
+/* Prog card */
+.pc { background:var(--bg2); border:1px solid var(--b1); border-radius:var(--r2); padding:11px 13px; margin-bottom:7px; display:flex; gap:11px; align-items:center; flex-wrap:wrap; }
+.pci { flex:1; min-width:175px; }
+.pcu { font-size:.8rem; font-weight:600; color:var(--t1); }
+.pcs { font-size:.65rem; color:var(--t3); margin-top:2px; }
+
+/* Lightbox */
+.lb { display:none; position:fixed; inset:0; background:rgba(0,0,0,.93); z-index:600; align-items:center; justify-content:center; }
+.lb.open { display:flex; }
+.lb img  { max-width:90vw; max-height:88vh; border-radius:var(--r); }
+.lbcls   { position:absolute; top:14px; right:18px; background:none; border:none; color:#aaa; font-size:1.4rem; cursor:pointer; }
+
+/* Toast */
+.toast { position:fixed; bottom:18px; right:18px; padding:9px 15px; border-radius:var(--r); font-size:.77rem; font-weight:500; box-shadow:var(--sh2); transform:translateY(50px); opacity:0; transition:all .3s; z-index:500; }
+.toast.show { transform:translateY(0); opacity:1; }
+.tok { background:#1a1d23; border:1px solid #1a7a45; color:#4ecf90; }
+.ter { background:var(--rd); color:#fff; }
+
+/* Responsive */
+@media(max-width:700px) {
+  .g2,.g3,.g4 { grid-template-columns:1fr; }
+  .mini-grid  { grid-template-columns:1fr; }
+  .dg         { grid-template-columns:1fr; }
+  .prx-grid   { grid-template-columns:1fr; }
+  main        { padding:10px; }
+}
+
+/* Print */
+@media print {
+  header,nav,.kf,.fbar,.brow,.btn,.ov,.lb,.toast,#pdf-cfg { display:none!important; }
+  body { background:#fff; color:#000; }
+  .tab { display:none!important; }
+  #tab-reportes { display:block!important; }
+}
+</style>
+</head>
+<body>
+
+<!-- ═══════════ HEADER ═══════════ -->
+<header>
+  <img src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAOEAAADhCAYAAAA+s9J6AAABCGlDQ1BJQ0MgUHJvZmlsZQAAeJxjYGA8wQAELAYMDLl5JUVB7k4KEZFRCuwPGBiBEAwSk4sLGHADoKpv1yBqL+viUYcLcKakFicD6Q9ArFIEtBxopAiQLZIOYWuA2EkQtg2IXV5SUAJkB4DYRSFBzkB2CpCtkY7ETkJiJxcUgdT3ANk2uTmlyQh3M/Ck5oUGA2kOIJZhKGYIYnBncAL5H6IkfxEDg8VXBgbmCQixpJkMDNtbGRgkbiHEVBYwMPC3MDBsO48QQ4RJQWJRIliIBYiZ0tIYGD4tZ2DgjWRgEL7AwMAVDQsIHG5TALvNnSEfCNMZchhSgSKeDHkMyQx6QJYRgwGDIYMZAKbWPz9HbOBQAAAn5ElEQVR4nO2df7AkVXn3P+ec7pm5c3/shWWXH8ULAoG4bsgSxQR5lx/1Rqqk8kPQYBGUMlAYLRIkMVBJhWhhNLGKilbUEC2KDVaIEkjYQIJWJWhJBPmRCiomuwuCgJv3FZZl7+7ee+femenu87x/dJ++PbO7ICxsO/c+n63Znjtzpn+e73me8zynTxsRQVGU+rB174CirHRUhIpSMypCRakZFaGi1IyKUFFqRkWoKDWjIlSUmlERKkrNqAgVpWZUhIpSMypCRakZFaGi1IyKUFFqRkWoKDWjIlSUmlERKkrNqAgVpWZUhIpSMypCRakZFaGi1IyKUFFqRkWoKDWjIlSUmlERKkrNqAgVpWZUhIpSMypCRakZFaGi1IyKUFFqRkWoKDUT1b0DB4/f76f5A98sZr+f57+ysM/3Sj0IS1dy6br4fcoMXq/lYUNGXIQeyBBJSbo9GmNjgEWATq/LWHMcN/SLrPhVuKAxKsSfBhIsnvzaREBDACmulCSIc7kkveCsw4vgxRDZuMa9fm0YcRHmGBMRx0AmJJIizhI32yTeY6zDVhpUWzSewSJK9Q/lkGIE8B4sGJs3kKVFFMAbsAJe8C73XZx1gMMai10mracZ9Sf1ZpngiqshJr+Q4WIa8lbGhSu7v0N1kC2TizlqOAHS8AekNv/TAE1h6XoZT4YHE2EBSYAMxIJbBq7MyDvVzhqycCElv25pBmkqdBd6eWs7LL7KZ+GtEV0e6mXpfwavs3qJwveLPfAWR1RWVhOBjcEtCz9u1N3RcKFSwBV9PA+xATDQauZf2rxwNSgTLKXDlCfB6vKQLrGS10ADYg2CLf55jAHwIBlLrawldZZ+Bg0DZBCPdg0GloE7KsX1MRboCVgD/R50e9BwQAqm6BRanysvvATIrPYJfxpwRcewaiEzD5j8WiV9mByHVpPMLDlwyyHCPdLtiABZcQQRKaQd6Hm23nKrTM8tMpV6muJxklINd3uzpD2pXFDl0GN93pfvWwtYnIDzEHmweESEjoXnSDj+nP9N65yNxsUR2CZizcgLEEZchAAZGQ6f99YbBnqeb3/5K6zdNcfUQpdVcYSTPDFhyuxgIUQD3lg1hDVhKIKfBtIiuNbI8v6iDRfFRezMesxMtJheezitjW+BsTEES159R78RHWkRGjwxHkOWu5w+hX6XZmeOY6OI6ShmsmExApk1YAxW8nxUVlw75+3SBVcOOUZybyREqGNyWXnAW0iSlLgR0026RNkiRB6hXzS9tsjzjrYQR1qEYLFSxDclOCaGlkAbQxshzjIwKUby8JvzGQCZz8vHvojUKbUhxpPY3PrFeUae1IL1lsgYUorrKQ48GByOqBDfaAsQRl2EAmR58jbP3AqYFHENnImJYk9qEsRaMuNxArHkltFhc5fG+CX9KocUz5IVTC1gPEUbmf8NNGxMZBwt72j6BqQxpE2MxDgDy0GHoy1CWAqNGUcYeuGNxRiHcZZUzIC7AxYjIaZmyYxBTGFJdXlol1DminLHxCJ4xFhSm/ffYw8igvEG44t+oNjBgaYjzuiLEPI8k7EYY3LPVATJPJLlQ6JCH9BkFo/FSi5YCcEZ6/MLa3R5KJfB/XQZQO6RRH6pvw7gvUcwZAiJERqRJYlzce5nRPdIMtrtSOGOiM2HquX5QCHKMuIsoZFmNHyGI8WJL/OFUrS83lRX5XV5yJf5e19cNyMeJ57Yp0TiiSSlKULsPbH3+T0x1pNhSG3eE1kOXYmRtoRCkWoAhITIpiB9GpIyngntNCEjxeHpRYDkgW3M0nhRS4b1vnbPbKUu+y5DDCQuF5rJhMh7fOaxAuMJWBxtESKfgKR5NHyf+2NGl5EWIYAvh6MZ8gCNxRnBmgxrMjz5xVyKgHrE5CMxvKG0kCEsrstDt8xjMLawhAXGg3icD/eCevLUkgefj9o24YoLxfC20WakRRjyhILFE0HWAt+jj6VrPb1IyIwjNSCSH6o3Pr+gxUgZKQICoYuhy0O3BDBii1xtPpgitSBECDECLEYZi86QpJK3sxJjaeYVV5aHCke7TwiAYMjTD0gEEiFY0uLWGDH5Rd03lu0H12J0WcfSislHyPg8ai0UwTIcHkdiI/rF7WZiYclueDApy2G40zIQoaKMNipCRakZFaGi1IyKUFFqRkWoKDWjIlSUmlERKkrNqAgVpWZUhIpSMypCRakZFaGi1IyKUFFqRkWoKDWjIlSUmlERKkrNqAgVpWZUhIpSMypCRakZFaGi1IyKUFFqRkWoKDWjIlSUmlERKkrNqAgVpWZUhIpSMypCRakZFaGi1IyKUFFqRkWoKDWjIlSUmlERKkrNqAgVpWZUhIpSMypCRakZFaGi1IyKUFFqRkWoKDWjIlSUmlERKkrNqAgVpWZUhIpSMypCRakZFaGi1IyKUFFqRkWoKDWjIlSUmlERKkrNqAgVpWZUhIpSMypCRakZFaGi1IyKUFFqRkWoKDWjIlSUmlERKkrNqAgVpWZUhIpSMypCRakZFaGi1IyKUFFqRkWoKDUT1b0DSn14A1K0w07ASP65GB9KLJUrXtZbrIARO1T21RBsgAEEKxAV601Nhsfi8CAWMRbEAh4Tfit2WZiRZXAIyqtFsHR8Co0mSd/jex4rhmbcIhWPWAGTITahFyX0oozU5qKzYrBiAIs3vLoX4I0FLFYMkbc0U0PkIXMJSdTHNCzeAzQwrkloGPCQJoDUceZeW9QSrmg8cTPGRIaJVhOHYbHfo9/vQ+YxFqzPyPCIAxHBCIgYRPLaLyLIq1RC/rsMxGJFsJkhTg04j4hHDHQXUjwxYiBLElzWx2cxlgbRMqm9y+QwlFeF8ZD26fY7uL5lvNEGk2FtRGwsznuaPqKBx2a51YowGGOx1uANYAVjXuXmBTJrsCIYb3AiWGOJERrkblqz2SA2MbMYnBOIPLHLyBKPiyy8ym3/NKEiXMEYgVbD4vueVhwhEfSjmJ73OBfjREj6KSKwCKRYnLEYu+QFioFcCXm/7pUsvYW06BBFQNNB3xu8iZgzntRAnHl6pMwaw0Lap2084PHShbSBi0e/Co/+ESivGitgEk8kBsk8P57dzezqKf7f/F5wEQ0srcwAnl6aC8YKhH4gQOTBiie3W69smVroRflfkYdGBq00F/ac9XgDppdiG2N0x8Z4PulzYmcBxtrEcQOIlnQ9wqgIVzhGLB7Bx2PER69iw4c/wIbpVTA2katjMckLOhms7MGgCSB5BBPzCpfOgyvW5W2+vczkJrpRfJ4IWAtZBqecCIetpk+ESTMiazFu9GOLKsIVjcVbSyqWmV7K/40Mx/6fs+F/HWWwTUhSsM1caDakIiQXURXDqxOh8ZV1FSkHb/L1xeRiTIEMSFMYa9BzDbpEtOIluzrihlBFuJIxAtliwvjEKjKx7FlchMlJQ8NBs0VGhPMsuXwGisRCZSW5RiwWj39FyzznlxUrcgQhisn7oADthgfv800aQ6/YjQgwCZj4EJyo1xkV4QrGCbSJMfMpE7Roi8vdv7hFSpSLyyxZGgEo8nrBG82KV5Fuf0VLi8VVPgtU039ZUSZ8MBV2pF8UCOZwhFERrmDyUTC5NXLeY8SD9YiltE/VsvkIm5zh7uGrWeZYJIzMKb605HZxgGpLsL+dGGFUhCuYzHjmmwnGeGxi6UsP4p6k9IwhwhLlQ9kETCGODF+4k8EtPBgz5JFCgsW4mXLonCsEZij6jUVgKAMwBtcs+pDLQIgqwhVMZj2p8xhjaGQZNi2jIDiy3A30hcgETGE1Lb4MaoKEZOErxwhUBA0eJE875OlHDyYrgje+2JrFF9YzbxjsyOtQRbjC8QYigTiDuKjrEWBIIatk5b0HI6WFGnAJg/l6FZQCCm6m95XxoD6YyLJgEL9gB/qRo4yKcAVjxOJ8ROQjGmlMI0soxqJR1nxD/r6MjBZ/l28rZV5hsn4wqmKKuyTs4OAa48tgUF7K4IiWVbdQRbiCsWKJ0oiGj2gmTRo+A2mZjBhHDC6qREEtWbjtCYjygTRQfG8ExNhXvKxquRqNCd/n22Vpu4W1LkfLLYNEoYpwhePE4Hyem/NlXDICcoHkvbal14ADWKn8oVv4SpdUtjHg1BbfZxxgZNoyuIUpoCJc8WRkDnqRoev6EHJ3As74oq7b8n9HmhssU1Qdc3CG6OV6ddV12/CBO0CBEUVFuNIxHsGQuJQsyyVnZCkhmEdEl6KQrnQOX5uq83IaOmC+cBmxPMJLijLCqAgVpWZUhIpSMypCRakZFaGi1IyKUFFqRkWoKDWjIlSUmlERKkrNqAgVpWZUhIpSMypCRakZFaGi1MwyuIuiMs5e8kmBxFi8WKQYcm/w+U2i1iPGk5l8omcBkDC1+0rED9yWZwCkmGfGLN0xH+6Bz2egsBjM0p31y2Aa+roZaRFKceOppZgLSBKKh9mR2JjEZDhSLBnG5NO5ZzZ/5FZi89m6GpmrTmW7AvF4DLFYnHjwiSA9I9aQ4fL5ZopZzfIbe2MasHS3bYyK8CAZaRFC9QZrn7fiRnJLJxGpdTifAvmMeVI89TWz+dQO4fbu8JCTVz9HyugufZjCHov1tniuhCcrSpWzrZmluZgylqYkVA6ekRehGf6jMkltfm+qxUg+7brxDiOWKLM4W0wcJDA4ccPKWtrifnnjHUtTW0QYLDY89Ygl8RUPNcPFxR8aVjhoRl6EsO+Me1L0+Za6LfnUfUbAZRHg8mceAJiUuoVQ19IXEy1ZiYpJlyIwLn/h8t62Z6ClM3gyPD1ya5hPQahCPBhGWoSGwpUciC7kwRePL8VYTr8uEVK09sY7xBYPnDTDk76vDPJp8A1hCt7MGLDWYHP3NMy+HSbjzSc2y0M0WeE9DE/5orxyRlqEA1TEaCTMFVZMoV48xFKMxxsHkrus+bMPhp4ytMIwkvcNxXi8FbBh1jUGzqktXjHVs+VRCR48Iy/CgRmcAbzHicdh86ncJZ+23SN44/Eud0Oz4mEoVkKMdWViTZpP7GRSvEnBZmSkmDwGWmIEGgbILM5k+XM70R7ha8HIi3AgTSUC4nEiROKJfP4yeIzxeUrD9IGIrHjopTEpXlamCC2CE4+VFDFR/twHvBi8yR/EYgcjX2GCUGMw1laeR6EcDCMtQqF4sKsHG5746j029UTGEadC7DMMaW79rMUUFtGKKya89ZiDeJbCKGO8J0o9DSd4B1lvESKDKx+Pa5dMXdmxtoRHZJty+nvlYBhpEUKRs3JAPyueYWBwzSbSN/RTaEYNTNEftOVzFSzW5tOsW5/3iazYQpwrZ+lMhnMCzrJnfh4bRdDt5o+Q9wlp5olds/I03uKxEJKfQx0s89ow0iL0QC8TmtZgigdm0Wixt+/Zk1ki43DGYDBI5TnrXgyp5AKM0zxxb8XgzUpbwmx/kdbUGEyN41wGfQ9ZESSNXZkf9MXSFYYviFJd0oNnpEVogabLs1S20YTUQ+zYkSasNk1oT7AYgV0a/1FWmNTk4fVmavLnsv+UjGA5lEsxHnfYFDu7XZLI8YLPoNWGVCAyLPQXaIxNkLH0eOy0cv41NvraMNIiNECy0KfVauQeknMgPda85S10d+7lhX6CNVkRcADwuGLAti9G03hTjF4TW6QzVs7S4IkQur0W49NHYGMLmTNInrRvj00Uj4bPHwqaizCPJRdDHpTXACMywkGJkMcy0OkuMN5qQS+DPQtLz9mzRa4wNOXiBx9waRl8Ht5KWkLhIFgggoV5OGY1xIak2yMeH6dfZA2jwpPokT+cs0kxUkl90YNm9EW40INGTObySJ7LyN3STi//fiwG55cqS5mbD5n9kNCnflEc8qUFE0Ga5Y1Ws5mfk3ipffMGHB6T5ucwc3na3qVFAYcGSA+SkXZHAWg2SRY6RFPjdLOMpnFYa2CsAQ2HOEgYeMbsQL0xA0/eW1nLMFxtUTwT7VyA3bRwNYvhfuEFgKyMpyQdakZfhFYwrUZeF9IE07AQGbx4rHUYloZaCYIVU96v6r3HFHdTZJkg4omicErssl8Gb3y8VVhAoBnnSzNQ2lbUV/xeO4SvGaPtjhaICFmWVQQEvV6PZrNJmqaICMYYnHMYY8q/AbIsQ0TK78JnAM5pTVNef0bem8+yDGMMvrijfmFhAYBms0mSJERRRBzHRFFUisx7PyA05xyhMRIRrLUqQOWQMfKWME3TAQuYZdmAgJIkn9bCGIMxBmsH250gzLCuLMtoFgEK7/0+5RXltWbkRQiDQgyWcWFhgbGxsQFBhmOtup1JkhDHcVnOe1+6p4pyKFgWIoTcDW02m/tYu2r/r9/vIyI0Go0BCxi+i+N4oGyjMXg7j6K8Hox8dDS4n2NjY6WAvvnNb8qw0JxzZb+w0WiwZs0as3btWrrdbvnb8F5RDiXLwhJWrVa322VyclLStJhlzbkyCGOtLQM4RxxxBCeffDJ/9Ed/xHnnnWfGxsbKQI4xZp++pqK8Xox81CG4l4FGo1EKbRjvfRktffHFF3nooYe44IIL+PSnPy1ZlhHHMSJCp9MZEODs7OzA9iBPgQTm5+eBpdRGeF+NuFaX3W53n/WFRiNJEoYbxn6/Xx5TdbvVbYRyw+sYXlfYTigb9qd6zsL7EKgK/eTqusIxVz+rHkN4LyJlcGz4/ITfhHWEfdrf9Qtlwu8OdI1HkZG3hNU+H+QXJ45jqV6kVqtFt9vFOUer1aLT6QAQRVFZWf71X/+Vs88+27RaLSCvmCHNEUSepinWWqy1LCws0G63B7afpine+7K8954kSWg2m2RZVvY7g8B7vR4iQtjmcD80SZIyXeK9J03T8vth62+ModlsMj8/z8TEBL1eb5/caDUV470vg0/Bpa8KtN1u73Oug0iq5yOcx3A+QsMQRVEZ9BouG/YxELyOJEnw3pf53UAURfR6vbJLEcoPR8JHlZG3hC/HGWecwRNPPGEWFhbM7Oys2bJli3n00Uc555xzSNMU5xxxHPPVr361FEOSJLRarYEgT7jwoUK32206nc5AxXXO0Wg0yLKMLMuw1pZCDv3WqoVtNpu0Wq3SulXFWQ0UBfFXK38URaWgWq0WzWaTfr9fVu4sy2g0Gjjnyn2DpVRN+BwY+C6KItrtNnNzcyRJMmCFG43GgPCjKCrFE0QbhPL8888Tx/HANsLxjY+PD1yjYN3iOB4QX9WaN5tNoihidna2XM+oG5DAsreEb3nLW3jooYdMaJEhd6WeeuopefOb31xeyNNPP52HH37YhGS9tZbdu3fjvWfv3r2ceOKJB8wbVj/ftWsXSZIwNjZGHMcD1nJubo7JyUlEhDRNefHFF+n3+xx++OE45/axPlVr1+l0eO655+SII44w09PTZZlq37W6H2Gb27dvZ3JykqmpKZxzAxZ8dnaWubk5Go0Ga9euHbBEw8fX6XTo9Xrs3LlT1q1bZ8K2g6Ahd9snJyf3Gb1UPZ5Ao9FgYWGBVquFtba03J1Oh4WFBSYmJli1alV5jIuLi0xOTpa/73Q6tFqtZWEJS19/VF/V/koYvmZtORupnH766dLtdul2uywsLJTlnnnmGaIoKstt2LBBkiRhz549XHfddQJIWE+r1ZI4juWGG26QsL0kSUp3MkkS/u7v/k5OOumkcn2AnHzyyXLTTTdJSI2ICN///vflve99r1T3MWz/zjvvlLC+UP6JJ56Q97znPRLHsTQajbL8b/7mb8p3vvMdCW7q8ccfL29+85vlDW94g9x6663y3//937JmzRqJ47j8zU033SQiwtzcHL/yK78izjkBZGxsTH71V39VZmZmBs5RmqZs2rRJ3va2tw2cD+ecXHTRRbJt2zbx3nPrrbdKFEVy2mmnybHHHis33nijBAu6uLhIlmV0Oh3Wr18v69evl1NPPVXOP/98CXnarVu3yu/8zu9I9Xo0m00588wz5Vvf+paE/el2uwyfn+Xwqn0HXm8RnnPOOTI/P19+v2fPHl544QUuuugiAcqKfdlll8m//Mu/lJWsugyvRqMhv/7rvy69Xo/FxUVEhJmZGTZu3FiWieNY4jgWY5amzn3/+98vIsIHPvABabfb0mq1yu+bzebANm644QYREXbv3s33vvc9GR8fL8u2222J47gUQxRF8vTTTwcXrlzHueeeKxMTE2KtLcvGcSwTExPyF3/xF/LzP//zZdnquTr11FPLBuNHP/oRhx12WCniiYmJskEK5aMokq1bt8qLL77I8LqGr9PXv/51GR8fL8/p5s2bRUT467/+6/I31fNSPX+XX365zM3N7SPAcA1G/VX7DrzeImw0GrJu3Tp54xvfKOvWrZPjjz++FFgoZ4yRe++9V7Zt21Zahre97W3y2c9+Vm655RZ597vfXVbGRqMht99+u4jk7tz69esHKml4jY2NCSBnnnlm2Qh86UtfKr9/17veJXfccYd85jOfkTe96U0DVveHP/whSZJw/vnnDzQUZ511lrz97W8vP7vnnntERHj++ecJx1E9rqplqX5mjJFWq7WPNQbk4YcfLhuByy67TBqNhrRaLbnmmmtk8+bN8vu///vSbrdLYZ999tkiInz84x8vP2u32/Jv//ZvEgJTaZpy1VVXldtYvXq1dDod7rjjDmk0GhJF0cC+VK1+OK8f/ehHJQR9ggWtu+6pCH9CEQ5bmqp1C+8vvfRSCa7lf/7nf8r1118vIXQukrtvF154YbmuK664QkSEL3zhCwMVfd26dfLII4/Ij370I2699VY5//zz5fnnn2dhYaEMxX/lK1+Rf/7nfxbvfbnvRQpExsfHBZBbb71V5ufnqQrqkksukbA/3/72t+WrX/1q6c51u12qbicgn/jEJ2Tbtm3y9a9/vdzvsK+rV6+Wu+66Sx5//HH52Mc+Vn4+NjYmf/iHf1huZ8+ePVx55ZWyfft2qufjtttuK4VorZXt27fz+OOPD4jpkksuKV33mZkZ1q1bV5b/0Ic+JFmWsWbNmgGr94lPfEK2bNkiTzzxhGzatKlcVzgv3//+90VE3dGfutfLiXDYtam+pqen5VOf+pQEtyYEJvr9Plu2bJFvfetbsnnzZrn99tvliiuuKH93wQUXSL/f57zzzitbbkDm5ubKfkuapvT7/YHKG7azc+dOvvvd78r9998v//iP/yibN2+WX/qlXyot4XXXXSdzc3Nln7Xdbssxxxwjn//852Xr1q0Sopbh+Iu8Yymm008/Xfr9fpkuuOaaawYanzvvvFNCOqXT6VD97sorrywtTng9++yzPPDAA3L33XfLnXfeKZ/73OdKYRtj5KGHHhIR4YILLhhwgffs2UOv1+Ohhx4auAZPPPGEPPzwwwPX4mMf+5iE6ydFw/dP//RPYowpz++f/umfDvSvl8tr2Q8J2bBhA9deey1r164t80rtdpsjjzyS6elpc8QRR7CwsECSJCRJwg033CB333033/ve98p0RKPRoN/vMz4+Trfb5dlnn2Xnzp0888wzQJ7SeO9731vm6oAyJ+eco9Pp0G632bNnD9dee63cf//9PP/88/R6PeI4LpPZExMTzM/Phwgvl156KbfddhsLCwssLCxw1VVXAXDyySfLqaeeyp/92Z/xxje+0YSoY0i5/MIv/EIZ4QVYvXo11toy3XH00UeXUcVqvi0IIPzulltukZtvvpkHH3yQ8fFxFhcXy3RFiDaL5OkDEeEP/uAPuOuuu8po9W233SYf+tCHzN/+7d/mLX5xPY477jjzwAMPCFCe2wsvvJA0TUnTlFarxcTEBL/8y79s4jiWfr9Pq9Xi6aefLs9Xr9cbyDWOMstehGNjY/zGb/yGaTab9Ho9rLWloGAwMf3Wt75VtmzZMjDaIwwKHxsbK5P8q1atot/vMzc3B0C73abRaDA+Po5InhqYmZnh8MMPZ3Z2lqmpKWZnZzn66KMF8vxgyA0mScLatWt54YUXyjs//ud//odms8mnPvUps337dvnGN74BLOURn3rqKZ599lk2b97Md77zHfnZn/3ZgdHoxxxzTFnpw/5WE+dr1qwZOEfGGLIsK5PtAJs2bZKPfOQjdDodms1mOYrIe8+RRx7Jjh07yt+HRmDjxo3mrLPOkkceeYR+v8+XvvQlLr74Yh588MGy7NVXX02r1WLHjh0D52H16tVGZGngQpZl7Nq1izVr1rBr166BUUbOOSYmJpbN0MJln6wPrXewLnEcDySLG40GIsLtt98ujz32GGmaEscx11xzDbOzs2bv3r1mYWHB3HzzzWXOrtfrMTU1xUknnQTkd3DcfffdwNJtUiGXNzU1hYjwyU9+UoJ16vV63HjjjSwuLhrvvdmxY4e5/PLLy5D+scceC8CRRx7Jvffea5588kn+4R/+gfe9731lkj5Yz09/+tOluII1m5+fL8tVR5WExiWOYxMGFASLEka9BOtyxRVXMDs7S5ZlnHLKKdx///3s3r3biIj5j//4DxPHcTmaJ+T4RISrrrqKfr+PtZZHH32UT37yk/L4448DeePzrne9y3S7XU477TR6vV4povvuu0+qudww0GHHjh3lwICjjjqq/K66HHWWx1G8BFNTU+Xolerol9CX9N5jjGHXrl1AbtWmp6e5+uqrzeTkZGkJ77vvvrJyzc/Pc/jhh7Nx48ayEs3MzPC7v/u7EqzjzMwMn/vc56TX65GmKffee2/ZGLzzne/kyiuvNGFUTpZlfPOb3yzF1Ol0CH26zZs3y+rVq82FF15obrnlFrN7927zcz/3c2VDct9995XHWh2bCUujY4ILKSLBnRNYGsUSRv6E4WJPPvmkNBoNxsbGaLVaXHvttZx55pkmCPS5556TMKa0mpg3xnDeeeeZVqvF5OQkaZry2c9+thxydvnll5cJ+LPOOsvA0hjQyy67jEceeUTC8L6ZmRnOP/98SdO0tHrnnnvugJeybKi7U3qwr5cLzPziL/6i7NixoywboqDVV6fT4Ytf/OJAoODmm2+WXbt28V//9V/y8Y9/fCCvd9ppp4mI8Nhjjw2kOdrttkRRJBs2bBDnnDQaDbn++utFRHj3u99dpg+OOuoo+fKXvyx79uzhu9/9rlx88cUDgYuPfOQjIiJs3bq1jEL+5V/+pdx5551yww03iHOujBhedNFFUoxvLaOP119/vQSBeO/5q7/6q4H937p1axl8KdzBMnDz4Q9/WBYXF6mei40bN8qPf/xjduzYwd///d/LMcccM5CGeeSRR6QasfyTP/mTgXMZRZFEUSSPPvpoGXXOsoyPfvSjAkiIkgJywgknyFvf+tZ90icbN26ULMtKzybse93177V41b4Dr7cIzzzzTAkRy1AxRfLoZfhcRNi2bZu0Wq2BZLQxRprNpjSbTTnqqKPKPNwZZ5whs7OziAj33HOPDKcHqERMAfniF78oX/va1wbydSGhHyry2rVrZWpqSgD54Ac/KLt37y6FEH5TjUiGyv3v//7vUrhr5Xd//Md/XObosizj85///MAxbdu2TcJxBxFSRGZ/+7d/W0SESy+9tNx2EGgcxxJFkUxPT5frstbKAw88IMG1Fcmjv1EUiXOujNi+6U1vkr1795bR4mDp3/nOd5bpImNM+aKICjebTTn66KPlmWeeobrPdde71/K17N3R3bt3Y63NWxwo34e5ZIILd8opp5ivfe1rtNtt2u122cfp9Xr83u/9Hn/+539e/m5xcZFms4n3nvPOO89s2bKF97znPfvcAeGc4+1vfztnn30273jHO8ymTZvK26nCBVhcXOSuu+7i137t18pbpsbHx5mammLTpk0cc8wx5W/CDHIiwrnnnss3vvENzj77bNPtdkt3MoggDMYWWZqqIxx7te/V6/XKG5lD36vb7XLTTTeZSy65pGzkIHd3N2zYwD333FPe9hU+DwPMvfesXr2a3/qt3yLLsnJ86fvf//5y/CpQ/v6OO+4wn/nMZzjhhBPyClnsYxhbevXVV/Pkk0+a4447rrxW1bGyy4GRH8ANS/0DYwy9Xo/Z2dnSbYnjmKmpqXLwb6j8IYAS+mShcuzcuZNt27bJiy++iLWWM844w4So5969e+n3+zI5OWmmp6cHpsPw3rN9+3a2bdsmMzMzHHnkkZxwwgmcdNJJpjqwevv27WzZskUWFhaYnp7mtNNOM+FOi7179+K9Z9WqVaxatQrnHHv27GH79u3ywx/+kE6nw+GHH86JJ57IcccdZ0K/sNvtsnfv3nKmuXa7zapVq2i1WnjvmZ2dpbBCMjY2Zqampmi32+UtWfPz88zPz2OMKQd7hwblsccek6eeeopOp8Mpp5zC+vXrTavVYmZmhtnZWRkfHzetVoupqamBuxv+5m/+Rq644oryGj377LPm+OOPHzjX1eswOzvLD37wA/nBD35AlmWcdNJJ/MzP/IxZu3bt61RrfnoYeREGN3P4tqNwsYMQq2IZjqqFljxYv36/X06DMTyJVLhFaHj7wMB9f2EqxbA/1XlNQ8I5WOJquepsb9VthHW8VESw2hgNfx4q/PB3geE7Iqr8pJNfVY+lcN0RES6++GJuuukmMz4+PpAqCdutBs1WIiOfZAkVq1q5wn1uw4SZ2AJBvNWbW0NovLquQFVYofzwZ9X7/qrrqN7sOizi/e33cOQxuG/VqG7Yp6pVr66z6oIPH3d1u9bageMM6w/lwv4G9zKUr3oRDz74oBx//PFGRLjxxhslNIpJkvC+972vzMUGAQYxVhu4cDzD53e5M/KWcH9UL2i1QlbFGvp3wIAbVf0+TPwUKuNwZd4fYcByqGDDljTc0R5Gr8RxXDYG1XWHfanu00tRFdb+5lcN2w/rq1rfqiU6kDUNv6+eg7Df3W6X6enp8h7O6o2569ev57777jOHHXbYgKCqcwANH3fwVn6S414OjLwlhH0rzvA0Dgea9PelRluEUTKwFNDYX6UYdtXCgIBAdbvDVjOUCxNQVdc/bNWqf1cbzgNNanyg8zLM/s7B/ryFsI1wvFUP5Omnn5aQ7A/HE6bLuO666zjiiCPKBi94I8ODDsJnw57JSrCEIy/C0PoeaGbtA/Vx9ldpg+VJkgRjzEAEcH/u3IEqfygTJo+CpcoXtlH9fTWZHpbD66/2fatWs7reYaGGxiGsv1qmun/Dwh7el2ABhxsRyC3/xMSE2bBhg8zNzTEzM8P4+DhveMMb+OAHP8iFF15ohs9fdVtV13y4IVoJAoRl4I4Ou5DAQEUPVqzq3gURWmtfMiDxcgy7kdUKOzwBcdVF/kndrCCUsH/DFXl4GokDNUihfLWPGBh2MV9qX6q/q05q1e12abVa7Ny5kzCcbWpq6oDbCNciTdOB54VUy4d9XQ5jQ1+OkRdhlQP1Z/ZXOffnXoYKH8pVK14QRPVhMS/lLu2vfPhNqJDDIn6pvmcIlITjqO7XSwVmqg3O8HkK76vfhe2E31TnYt1ffy38vXfv3nJIWpgbJ5R/Jd7ISmRZiVBRRhFtihSlZlSEilIzKkJFqRkVoaLUjIpQUWpGRagoNaMiVJSaUREqSs2oCBWlZlSEilIzKkJFqRkVoaLUjIpQUWpGRagoNaMiVJSaUREqSs2oCBWlZlSEilIzKkJFqRkVoaLUjIpQUWpGRagoNaMiVJSaUREqSs2oCBWlZlSEilIzKkJFqRkVoaLUjIpQUWpGRagoNaMiVJSaUREqSs38fyE82i/sZx9lAAAAAElFTkSuQmCC" alt="Pacasmayo" style="height:44px;width:auto;flex-shrink:0;">
+  <div style="width:1px;height:30px;background:rgba(255,255,255,.15);flex-shrink:0;"></div>
+  <div>
+    <div class="htitle">Sistema de Gestión de Mantenimiento Industrial</div>
+    <div class="hsub">Pacasmayo &nbsp;·&nbsp; Control de Flota &nbsp;·&nbsp; Registro de Intervenciones</div>
+  </div>
+  <div class="hright">
+    <span class="hdate" id="hfecha"></span>
+    <span class="honline"><div class="hdot"></div>SISTEMA EN LÍNEA</span>
+  </div>
+</header>
+
+<!-- ═══════════ NAV ═══════════ -->
+<nav>
+  <button class="nb active" onclick="goTab('dashboard',this)">📊 Dashboard</button>
+  <button class="nb" onclick="goTab('registro',this)">➕ Registrar</button>
+  <button class="nb" onclick="goTab('historial',this)">📋 Historial</button>
+  <button class="nb" onclick="goTab('estadisticas',this)">📈 Estadísticas</button>
+  <button class="nb" onclick="goTab('programados',this)">🔧 Programados</button>
+  <button class="nb" onclick="goTab('observaciones',this)">📝 Observaciones</button>
+  <button class="nb" onclick="goTab('calendario',this)">📅 Calendario</button>
+  <button class="nb" onclick="goTab('reportes',this)">📄 Reportes PDF</button>
+</nav>
+
+<main>
+<!-- ═══ BANNER FIREBASE SIN CONFIGURAR ═══ -->
+<div id="fb-banner" style="display:none;background:linear-gradient(90deg,#cc1a1a,#a81414);color:#fff;padding:10px 20px;border-radius:8px;margin-bottom:14px;display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:8px;font-size:.78rem;">
+  <div style="display:flex;align-items:center;gap:10px;">
+    <span style="font-size:1.2rem;">⚠️</span>
+    <div>
+      <strong>Firebase no configurado — los datos NO se comparten con tus compañeros</strong>
+      <div style="font-size:.7rem;opacity:.85;margin-top:2px;">Cada usuario ve solo sus propios datos (guardados en su navegador). Configura Firebase para sincronizar en tiempo real.</div>
+    </div>
+  </div>
+  <a href="https://console.firebase.google.com" target="_blank" style="background:rgba(255,255,255,.2);color:#fff;padding:5px 13px;border-radius:4px;text-decoration:none;font-weight:600;font-size:.72rem;white-space:nowrap;border:1px solid rgba(255,255,255,.3);">Configurar Firebase →</a>
+</div>
+
+<!-- ═══ DASHBOARD ═══ -->
+<div class="tab active" id="tab-dashboard">
+  <div class="ph"><div><h2>Panel General</h2><p>Estado operativo de la flota</p></div></div>
+  <div class="krow">
+    <div class="kpi"><div class="kl">Registros Totales</div><div class="kv" id="k-total">0</div><div class="ks">intervenciones</div><div class="kb kb-b"></div></div>
+    <div class="kpi"><div class="kl">Unidades Activas</div><div class="kv" id="k-op">5</div><div class="ks">de 5 en flota</div><div class="kb kb-g"></div></div>
+    <div class="kpi"><div class="kl">Fuera de Planta</div><div class="kv" id="k-fp">0</div><div class="ks">taller externo</div><div class="kb kb-a"></div></div>
+    <div class="kpi"><div class="kl">Horas Paro Total</div><div class="kv" id="k-hrs">0h</div><div class="ks">acumuladas</div><div class="kb kb-r"></div></div>
+    <div class="kpi"><div class="kl">Próx. Programados</div><div class="kv" id="k-prox">0</div><div class="ks">con fecha estimada</div><div class="kb kb-p"></div></div>
+  </div>
+  <div style="display:grid;grid-template-columns:1fr 1fr;gap:11px;margin-bottom:11px;" id="dash2">
+    <div class="card"><div class="ct">🚛 Estado de Flota</div><div class="fleet-grid" id="fleet-grid"></div></div>
+    <div class="card"><div class="ct">⏱ Actividad Reciente</div><div id="act-list"><p style="color:var(--t3);padding:14px;text-align:center;font-size:.74rem;">Sin registros aún.</p></div></div>
+  </div>
+  <div class="card"><div class="ct">📅 Próximos Mantenimientos Programados</div><div id="next-list"><p style="color:var(--t3);padding:11px;font-size:.74rem;">Registre mantenimientos con intervalo de horas para ver aquí.</p></div></div>
+</div>
+
+<!-- ═══ REGISTRO ═══ -->
+<div class="tab" id="tab-registro">
+  <div class="ph"><div><h2>Registrar Mantenimiento</h2><p>Complete todos los campos del formulario</p></div></div>
+  <div class="card">
+
+    <div class="sct">Identificación de la Unidad</div>
+    <div class="gg g4">
+      <div class="fg"><label class="fl">Unidad / Máquina *</label>
+        <select id="f-un"><option value="">— Seleccionar —</option>
+          <option>CARGADOR FRONTAL</option><option>TRACTOR</option><option>CISTERNA</option><option>BARREDORA</option><option>VOLQUETE</option>
+        </select>
+      </div>
+      <div class="fg"><label class="fl">Código / Placa</label><input id="f-cod" type="text" placeholder="Ej: CF-001"></div>
+      <div class="fg"><label class="fl">Supervisor Responsable</label><input id="f-sup" type="text" placeholder="Nombre completo"></div>
+      <div class="fg" style="display:none;"><label class="fl">Horómetro Actual (hrs)</label><input id="f-horo" type="number" min="0" placeholder="Ej: 1250" oninput="calcProx()"></div>
+    </div>
+
+    <hr class="dv">
+
+    <div class="sct">Período del Mantenimiento</div>
+    <p style="font-size:.69rem;color:var(--t3);margin-bottom:10px;">Si el mantenimiento dura varios días (ej: 3 días en taller externo), complete fecha inicio y fecha fin. Las horas de paro se calculan automáticamente.</p>
+    <div class="gg g4">
+      <div class="fg"><label class="fl">Fecha de Inicio *</label><input id="f-fi" type="date" onchange="calcHoras()"></div>
+      <div class="fg"><label class="fl">Hora de Inicio</label><input id="f-hi" type="time" onchange="calcHoras()"></div>
+      <div class="fg"><label class="fl">Fecha de Finalización</label><input id="f-ff" type="date" onchange="calcHoras()"></div>
+      <div class="fg"><label class="fl">Hora de Finalización</label><input id="f-hf" type="time" onchange="calcHoras()"></div>
+    </div>
+    <div class="gg g2" style="margin-top:10px;">
+      <div class="fg">
+        <label class="fl">Total Horas de Paro (calculado automáticamente)</label>
+        <div class="comp" id="comp-hrs"><span style="color:var(--t3);font-size:.76rem;">Complete las fechas para calcular</span></div>
+        <input type="hidden" id="f-horas">
+      </div>
+      <div class="fg"><label class="fl">¿Sale de Planta?</label>
+        <select id="f-sale"><option value="NO">NO — Mantenimiento en sitio</option><option value="SÍ">SÍ — Sale a taller externo</option></select>
+      </div>
+    </div>
+
+    <hr class="dv">
+
+    <div class="sct">Tipo y Motivo</div>
+    <div class="gg g2">
+      <div class="fg full">
+        <label class="fl">Tipo de Mantenimiento *</label>
+        <div class="rrow">
+          <label class="rb"><input type="radio" name="tipo" value="Preventivo" checked> Preventivo</label>
+          <label class="rb"><input type="radio" name="tipo" value="Correctivo"> Correctivo</label>
+          <label class="rb"><input type="radio" name="tipo" value="Predictivo"> Predictivo</label>
+          <label class="rb"><input type="radio" name="tipo" value="Emergencia"> Emergencia</label>
+        </div>
+      </div>
+      <div class="fg"><label class="fl">Categoría del Motivo</label>
+        <select id="f-cat">
+          <option value="">— Seleccionar —</option>
+          <option>Falla mecánica</option><option>Falla eléctrica</option><option>Falla hidráulica</option>
+          <option>Falla de motor</option><option>Desgaste de neumáticos</option><option>Cambio de aceite / filtros</option>
+          <option>Revisión de frenos</option><option>Fuga de combustible</option><option>Fuga de aceite</option>
+          <option>Daño por accidente</option><option>Mantenimiento programado</option><option>Revisión general</option>
+          <option>Recalentamiento de motor</option><option>Falla sistema enfriamiento</option>
+          <option>Problema de transmisión</option><option>Otro</option>
+        </select>
+      </div>
+      <div class="fg"><label class="fl">Estado del Trabajo</label>
+        <select id="f-est"><option value="PROGRAMADO">Programado</option><option value="EN PROCESO">En Proceso</option><option value="COMPLETADO">Completado</option><option value="PENDIENTE">Pendiente</option></select>
+      </div>
+      <div class="fg full"><label class="fl">Descripción / Síntomas Observados</label>
+        <textarea id="f-desc" placeholder="Describa el problema, trabajos realizados y observaciones técnicas..."></textarea>
+      </div>
+      <div class="fg full"><label class="fl">Repuestos y Materiales Utilizados</label>
+        <textarea id="f-rep" placeholder="Liste repuestos, lubricantes y materiales empleados..." style="min-height:55px;"></textarea>
+      </div>
+    </div>
+
+    <hr class="dv">
+
+    <!-- PRÓXIMO MANTENIMIENTO POR FECHA DIRECTA -->
+    <div class="sc" style="border-color:rgba(74,120,240,.2);background:rgba(74,120,240,.03);">
+      <div class="sct" style="color:var(--ac);">🔧 Próximo Mantenimiento — Fecha Programada</div>
+      <p style="font-size:.69rem;color:var(--t3);margin-bottom:12px;">
+        Ingrese el intervalo en horas y el sistema calculará automáticamente
+        <strong style="color:var(--t2);">la fecha exacta estimada</strong> a partir de la fecha de inicio del mantenimiento actual.
+      </p>
+      <div class="gg g3">
+        <div class="fg">
+          <label class="fl">Intervalo (horas)</label>
+          <input id="f-intv" type="number" min="0" placeholder="Ej: 250" oninput="calcProx()">
+          <div class="hint">Cada cuántas horas de uso se realiza este mantenimiento</div>
+        </div>
+        <div class="fg" style="display:none;">
+          <input id="f-uso" type="number" value="1" min="1">
+        </div>
+        <div class="fg">
+          <label class="fl">Descripción del próximo mantenimiento</label>
+          <input id="f-pdesc" type="text" placeholder="Ej: Cambio aceite motor + filtros">
+        </div>
+        <div class="fg"></div>
+      </div>
+
+      <!-- Resultado automático -->
+      <div class="prx-grid" id="prx-res" style="display:none;grid-template-columns:1fr 1fr;">
+        <div class="prx-box">
+          <div class="prx-l">Horas hasta el próximo</div>
+          <div class="prx-v" id="px-d" style="color:var(--am);"></div>
+        </div>
+        <div class="prx-box" style="border-color:rgba(40,201,154,.25);background:rgba(40,201,154,.04);">
+          <div class="prx-l">📅 Fecha estimada</div>
+          <div class="prx-v" id="px-f" style="color:var(--gr);font-size:1rem;"></div>
+        </div>
+      </div>
+    </div>
+
+    <hr class="dv">
+
+    <div class="sct">Evidencia Fotográfica</div>
+    <div class="pz" onclick="document.getElementById('finput').click()">
+      <div style="font-size:1.3rem;margin-bottom:4px;">📷</div>
+      <div style="font-size:.77rem;color:var(--t2);">Haga clic para adjuntar fotografías</div>
+      <div style="font-size:.63rem;color:var(--t3);margin-top:2px;">JPG, PNG, WEBP — Máximo 5 fotografías</div>
+      <input id="finput" type="file" multiple accept="image/*" onchange="addFotos(this)">
+    </div>
+    <div class="ppvs" id="pprev"></div>
+
+    <hr class="dv">
+
+    <div class="sc" style="border-color:rgba(217,69,69,.2);background:rgba(217,69,69,.02);">
+      <div class="sct" style="color:var(--rd);">📝 Observaciones para Jefatura</div>
+      <div class="gg g2">
+        <div class="fg full"><label class="fl">Observaciones</label><textarea id="f-obs" placeholder="Observaciones importantes para jefatura..."></textarea></div>
+        <div class="fg"><label class="fl">Nivel de Criticidad</label>
+          <select id="f-crit"><option value="Informativo">Informativo</option><option value="Advertencia">Advertencia</option><option value="Crítico">Crítico</option></select>
+        </div>
+      </div>
+    </div>
+
+    <div class="brow">
+      <button class="btn bg" onclick="limpiarForm()">Limpiar formulario</button>
+      <button class="btn bp" onclick="guardar()">Guardar Registro</button>
+    </div>
+  </div>
+</div>
+
+<!-- ═══ HISTORIAL ═══ -->
+<div class="tab" id="tab-historial">
+  <div class="ph"><div><h2>Historial de Mantenimientos</h2></div></div>
+  <div class="card">
+    <div class="fbar">
+      <select id="h-un" onchange="renderHist()"><option value="">Todas las unidades</option><option>CARGADOR FRONTAL</option><option>TRACTOR</option><option>CISTERNA</option><option>BARREDORA</option><option>VOLQUETE</option></select>
+      <select id="h-tp" onchange="renderHist()"><option value="">Todos los tipos</option><option>Preventivo</option><option>Correctivo</option><option>Predictivo</option><option>Emergencia</option></select>
+      <input id="h-tx" type="text" placeholder="Buscar…" oninput="renderHist()" style="max-width:200px;">
+      <button class="btn bg bsm" onclick="exportCSV()">↓ Exportar CSV</button>
+    </div>
+    <div class="tw">
+      <table>
+        <thead><tr>
+          <th>N°</th><th>F.Inicio</th><th>F.Fin</th><th>Unidad</th><th>Código</th><th>Tipo</th>
+          <th>Categoría</th><th>Supervisor</th><th>H.Paro</th><th>FP</th>
+          <th>Estado</th><th>Crit.</th><th>Fotos</th><th>Acciones</th>
+        </tr></thead>
+        <tbody id="hbody"><tr><td colspan="15" style="text-align:center;padding:22px;color:var(--t3);">Sin registros.</td></tr></tbody>
+      </table>
+    </div>
+  </div>
+</div>
+
+<!-- ═══ ESTADÍSTICAS ═══ -->
+<div class="tab" id="tab-estadisticas">
+  <div class="ph"><div><h2>Indicadores y Estadísticas</h2><p>Análisis de la gestión de mantenimiento</p></div></div>
+
+  <!-- Filtro por unidad -->
+  <div class="kf">
+    <button class="kfb active" onclick="setKf(this,'')">Todas las Unidades</button>
+    <button class="kfb" onclick="setKf(this,'CARGADOR FRONTAL')">Carg. Frontal</button>
+    <button class="kfb" onclick="setKf(this,'TRACTOR')">Tractor</button>
+    <button class="kfb" onclick="setKf(this,'CISTERNA')">Cisterna</button>
+    <button class="kfb" onclick="setKf(this,'BARREDORA')">Barredora</button>
+    <button class="kfb" onclick="setKf(this,'VOLQUETE')">Volquete</button>
+  </div>
+
+  <!-- KPIs -->
+  <div class="krow" style="margin-bottom:14px;">
+    <div class="kpi"><div class="kl">Intervenciones</div><div class="kv" id="ks-t">0</div><div class="kb kb-b"></div></div>
+    <div class="kpi"><div class="kl">H. Paro Total</div><div class="kv" id="ks-h">0h</div><div class="kb kb-r"></div></div>
+    <div class="kpi"><div class="kl">Planta Externa</div><div class="kv" id="ks-f">0</div><div class="kb kb-a"></div></div>
+    <div class="kpi"><div class="kl">Completados</div><div class="kv" id="ks-c">0</div><div class="kb kb-g"></div></div>
+  </div>
+
+  <!-- GRÁFICO PRINCIPAL con 3 TABS: Por Unidad / Por Mes / Por Día -->
+  <div class="chart-main">
+    <div style="display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:8px;margin-bottom:0;">
+      <div>
+        <div class="stat-tabs" id="stabs">
+          <button class="stab active" onclick="setStatTab(this,'unidad')">📊 Por Unidad</button>
+          <button class="stab" onclick="setStatTab(this,'mes')">📅 Por Mes</button>
+          <button class="stab" onclick="setStatTab(this,'dia')">🗓 Por Día</button>
+        </div>
+      </div>
+      <div class="mtoggle">
+        <button class="mtb active" id="mt-n" onclick="setMetric(this,'count')">Intervenciones</button>
+        <button class="mtb" id="mt-h" onclick="setMetric(this,'horas')">Horas de Paro</button>
+      </div>
+    </div>
+
+    <!-- Panel: Por Unidad -->
+    <div class="stat-panel active" id="sp-unidad" style="padding-top:14px;">
+      <canvas id="ch-unidad" style="max-height:320px;"></canvas>
+    </div>
+
+    <!-- Panel: Por Mes -->
+    <div class="stat-panel" id="sp-mes" style="padding-top:14px;">
+      <canvas id="ch-mes" style="max-height:320px;"></canvas>
+    </div>
+
+    <!-- Panel: Por Día -->
+    <div class="stat-panel" id="sp-dia" style="padding-top:14px;">
+      <div class="day-picker">
+        <label>Seleccionar día:</label>
+        <input type="date" id="dp-dia" oninput="renderDia()">
+        <button class="btn bg bsm" onclick="document.getElementById('dp-dia').value=todayStr();renderDia();">Hoy</button>
+        <button class="btn bg bsm" onclick="navDia(-1)">‹ Anterior</button>
+        <button class="btn bg bsm" onclick="navDia(1)">Siguiente ›</button>
+        <span id="dp-label" style="font-size:.7rem;color:var(--t3);"></span>
+      </div>
+      <canvas id="ch-dia" style="max-height:320px;"></canvas>
+    </div>
+  </div>
+
+  <!-- Fila 1: Donut tipo + Barras estado apiladas -->
+  <div class="mini-grid">
+    <div class="mini-box" style="display:flex;flex-direction:column;align-items:center;">
+      <div class="mini-ttl" style="width:100%;">🍩 Distribución por Tipo</div>
+      <canvas id="ch-tp" style="max-height:260px;max-width:280px;"></canvas>
+    </div>
+    <div class="mini-box">
+      <div class="mini-ttl">📋 Estado de los Trabajos — por unidad</div>
+      <canvas id="ch-est" style="max-height:260px;"></canvas>
+    </div>
+  </div>
+
+  <!-- Fila 2: Categoría barras horiz. + Horas paro apiladas -->
+  <div class="mini-grid">
+    <div class="mini-box">
+      <div class="mini-ttl">🔩 Horas de Paro por Categoría</div>
+      <canvas id="ch-cat" style="max-height:280px;"></canvas>
+    </div>
+    <div class="mini-box">
+      <div class="mini-ttl">🏭 En Sitio vs Planta Externa — por unidad</div>
+      <canvas id="ch-fp"  style="max-height:280px;"></canvas>
+    </div>
+  </div>
+
+  <!-- Tabla supervisores -->
+  <div class="card">
+    <div class="ct">👤 Resumen por Supervisor</div>
+    <div class="tw">
+      <table>
+        <thead><tr><th>Supervisor</th><th>Intervenciones</th><th>H.Paro</th><th>Completados</th><th>Pendientes</th><th>Obs.Críticas</th></tr></thead>
+        <tbody id="supbody"><tr><td colspan="6" style="text-align:center;padding:15px;color:var(--t3);">Sin datos.</td></tr></tbody>
+      </table>
+    </div>
+  </div>
+</div>
+
+<!-- ═══ PROGRAMADOS ═══ -->
+<div class="tab" id="tab-programados">
+  <div class="ph"><div><h2>Mantenimientos Programados</h2><p>Seguimiento de fechas estimadas por máquina</p></div></div>
+  <div class="card">
+    <div class="ct">⏰ Estado por Máquina — Fecha Estimada de Próximo Mantenimiento</div>
+    <div id="proglist"><p style="color:var(--t3);padding:15px;font-size:.74rem;">Registre mantenimientos con intervalo en horas para calcular fechas automáticamente.</p></div>
+  </div>
+</div>
+
+<!-- ═══ OBSERVACIONES ═══ -->
+<div class="tab" id="tab-observaciones">
+  <div class="ph"><div><h2>Observaciones para Jefatura</h2></div></div>
+  <div class="fbar">
+    <select id="obs-cr" onchange="renderObs()"><option value="">Todos los niveles</option><option value="Crítico">Solo Críticos</option><option value="Advertencia">Solo Advertencias</option><option value="Informativo">Solo Informativos</option></select>
+    <select id="obs-un" onchange="renderObs()"><option value="">Todas las unidades</option><option>CARGADOR FRONTAL</option><option>TRACTOR</option><option>CISTERNA</option><option>BARREDORA</option><option>VOLQUETE</option></select>
+  </div>
+  <div id="obslist"><p style="color:var(--t3);padding:22px;text-align:center;font-size:.74rem;">Sin observaciones.</p></div>
+</div>
+
+<!-- ═══ CALENDARIO ═══ -->
+<div class="tab" id="tab-calendario">
+  <div class="ph"><div><h2>Calendario de Mantenimientos</h2></div></div>
+  <div class="card">
+    <div class="cal-hdr">
+      <button class="btn bg bsm" onclick="calNav(-1)">‹ Anterior</button>
+      <span class="cal-m" id="cal-ttl"></span>
+      <button class="btn bg bsm" onclick="calNav(1)">Siguiente ›</button>
+    </div>
+    <div class="cal-g" id="cal-lbls"></div>
+    <div class="cal-g" id="cal-cells" style="margin-top:2px;"></div>
+    <div style="display:flex;gap:14px;margin-top:10px;flex-wrap:wrap;">
+      <span style="font-size:.64rem;color:var(--t3);display:flex;align-items:center;gap:4px;"><span style="width:8px;height:8px;border-radius:2px;background:rgba(74,120,240,.45);display:inline-block;"></span>Preventivo / Predictivo</span>
+      <span style="font-size:.64rem;color:var(--t3);display:flex;align-items:center;gap:4px;"><span style="width:8px;height:8px;border-radius:2px;background:rgba(217,146,14,.45);display:inline-block;"></span>Correctivo</span>
+      <span style="font-size:.64rem;color:var(--t3);display:flex;align-items:center;gap:4px;"><span style="width:8px;height:8px;border-radius:2px;background:rgba(217,69,69,.45);display:inline-block;"></span>Emergencia</span>
+      <span style="font-size:.64rem;color:rgba(74,120,240,.7);display:flex;align-items:center;gap:4px;"><span style="width:8px;height:8px;border-radius:2px;border:1px solid rgba(74,120,240,.5);display:inline-block;"></span>Hoy</span>
+    </div>
+  </div>
+</div>
+
+<!-- ═══ REPORTES ═══ -->
+<div class="tab" id="tab-reportes">
+  <div class="ph"><div><h2>Reportes PDF</h2><p>Generación de informes por unidad y período</p></div></div>
+  <div class="card" id="pdf-cfg" style="margin-bottom:11px;">
+    <div class="ct">⚙ Configurar Reporte</div>
+    <div class="gg g4" style="margin-bottom:10px;">
+      <div class="fg"><label class="fl">Unidad</label><select id="pdf-un"><option value="">Todas</option><option>CARGADOR FRONTAL</option><option>TRACTOR</option><option>CISTERNA</option><option>BARREDORA</option><option>VOLQUETE</option></select></div>
+      <div class="fg"><label class="fl">Desde</label><input id="pdf-d" type="date"></div>
+      <div class="fg"><label class="fl">Hasta</label><input id="pdf-h" type="date"></div>
+      <div class="fg" style="flex-direction:row;align-items:flex-end;gap:6px;padding-top:18px;">
+        <button class="btn bg" onclick="genPDF()">📄 Reporte</button>
+        <button class="btn bp" onclick="genSemanal()">📅 Semanal</button>
+      </div>
+    </div>
+    <p style="font-size:.68rem;color:var(--t3);">Los reportes incluyen historial completo, horas de paro, próximos mantenimientos con fecha estimada y evidencia fotográfica. Use Ctrl+P → Guardar como PDF.</p>
+  </div>
+  <div class="card" id="pdf-area" style="display:none;">
+    <div class="ct">👁 Vista Previa del Reporte</div>
+    <div id="pdf-content"></div>
+    <div class="brow"><button class="btn bp" onclick="window.print()">🖨 Imprimir / Guardar PDF</button></div>
+  </div>
+</div>
+
+</main>
+
+<!-- ═══ MODAL DETALLE ═══ -->
+<div class="ov" id="ov-det">
+  <div class="modal">
+    <div class="mhd"><div class="mttl" id="det-ttl">Detalle</div><button class="mcls" onclick="closeOv('ov-det')">✕</button></div>
+    <div id="det-body"></div>
+  </div>
+</div>
+
+<!-- ═══ MODAL EDITAR ═══ -->
+<div class="ov" id="ov-edit">
+  <div class="modal">
+    <div class="mhd"><div class="mttl">Editar Registro</div><button class="mcls" onclick="closeOv('ov-edit')">✕</button></div>
+    <div id="edit-body"></div>
+    <div class="brow">
+      <button class="btn bg" onclick="closeOv('ov-edit')">Cancelar</button>
+      <button class="btn bp" onclick="saveEdit()">Guardar Cambios</button>
+    </div>
+  </div>
+</div>
+
+<!-- ═══ LIGHTBOX ═══ -->
+<div class="lb" id="lb" onclick="closeLB()">
+  <button class="lbcls" onclick="closeLB()">✕</button>
+  <img id="lbimg" src="" alt="">
+</div>
+
+<!-- ═══ TOAST ═══ -->
+<div class="toast" id="toast"></div>
+
+<script>
+// ══════════════════════════════════════════════
+// ESTADO GLOBAL
+// ══════════════════════════════════════════════
+let DB = JSON.parse(localStorage.getItem('sgm5')||'[]');
+let editIdx = -1, kfUnit = '', calY, calM;
+let fotosB64 = [];
+let statMetric = 'count';   // 'count' | 'horas'
+let statTab    = 'unidad';  // 'unidad' | 'mes' | 'dia'
+let charts     = {};
+
+const UNITS = [
+  {id:'CF', nm:'Cargador Frontal', full:'CARGADOR FRONTAL'},
+  {id:'TR', nm:'Tractor',          full:'TRACTOR'},
+  {id:'CI', nm:'Cisterna',         full:'CISTERNA'},
+  {id:'BA', nm:'Barredora',        full:'BARREDORA'},
+  {id:'VO', nm:'Volquete',         full:'VOLQUETE'},
+];
+
+// Paleta — mismo orden que UNITS
+const PAL   = ['#cc1a1a','#c06010','#1a7a45','#1a5fa0','#6a40c0'];
+const PAL_A = ['rgba(204,26,26,.70)','rgba(192,96,16,.70)','rgba(26,122,69,.70)','rgba(26,95,160,.70)','rgba(106,64,192,.70)'];
+const PAL_TIPO = ['#1a5fa0','#cc1a1a','#6a40c0','#c06010'];   // Prev/Corr/Pred/Emer
+const PAL_TIPO_A = ['rgba(26,95,160,.75)','rgba(204,26,26,.75)','rgba(106,64,192,.75)','rgba(192,96,16,.75)'];
+
+const TB = {Preventivo:'bdb',Correctivo:'bda',Predictivo:'bdp',Emergencia:'bdr'};
+const EB = {COMPLETADO:'bdg2','EN PROCESO':'bdb',PROGRAMADO:'bda',PENDIENTE:'bds'};
+const CB = {Crítico:'bdr',Advertencia:'bda',Informativo:'bdb'};
+
+// Opciones comunes para chart.js
+const CHART_DEFAULTS = {
+  responsive:true,
+  animation:{duration:350},
+  plugins:{
+    legend:{
+      display:true, position:'bottom', align:'start',
+      labels:{ color:'#4a5568', font:{size:11,family:'Inter'}, boxWidth:11, boxHeight:11, padding:12 }
+    },
+    tooltip:{
+      backgroundColor:'#1a1d23', borderColor:'#333', borderWidth:1,
+      titleColor:'#ffffff', bodyColor:'#b0b8c8', padding:10, cornerRadius:6,
+    }
+  },
+  scales:{
+    x:{ ticks:{color:'#8898aa',font:{size:10}}, grid:{color:'rgba(0,0,0,.05)'} },
+    y:{ ticks:{color:'#8898aa',font:{size:10}}, grid:{color:'rgba(0,0,0,.07)'}, beginAtZero:true }
+  }
+};
+
+const DOUGHNUT_DEFAULTS = {
+  responsive:true,
+  cutout:'52%',
+  animation:{duration:350},
+  plugins:{
+    legend:{
+      display:true, position:'bottom', align:'center',
+      labels:{ color:'#4a5568', font:{size:11,family:'Inter'}, boxWidth:11, boxHeight:11, padding:10 }
+    },
+    tooltip:{
+      backgroundColor:'#1a1d23', borderColor:'#333', borderWidth:1,
+      titleColor:'#ffffff', bodyColor:'#b0b8c8', padding:10, cornerRadius:6,
+    }
+  }
+};
+
+// ══════════════════════════════════════════════
+// INIT
+// ══════════════════════════════════════════════
+window.onload = () => {
+  const now = new Date();
+  document.getElementById('hfecha').textContent = now.toLocaleDateString('es-PE',{weekday:'short',day:'2-digit',month:'short',year:'numeric'});
+  document.getElementById('f-fi').value = todayStr();
+  document.getElementById('dp-dia').value = todayStr();
+  calY = now.getFullYear(); calM = now.getMonth();
+  renderDash();
+  if(window.innerWidth<700) document.getElementById('dash2').style.gridTemplateColumns='1fr';
+};
+
+function todayStr(){ return new Date().toISOString().split('T')[0]; }
+function fmtD(s){ if(!s)return'—'; const[y,m,d]=s.split('-'); return`${d}/${m}/${y}`; }
+function save(){ localStorage.setItem('sgm5',JSON.stringify(DB)); }
+
+// ══════════════════════════════════════════════
+// NAVEGACIÓN
+// ══════════════════════════════════════════════
+function goTab(id, btn){
+  document.querySelectorAll('.tab').forEach(t=>t.classList.remove('active'));
+  document.querySelectorAll('.nb').forEach(b=>b.classList.remove('active'));
+  document.getElementById('tab-'+id).classList.add('active');
+  if(btn) btn.classList.add('active');
+  ({dashboard:renderDash, historial:renderHist, estadisticas:renderStats,
+    programados:renderProg, observaciones:renderObs, calendario:renderCal})[id]?.();
+}
+
+// ══════════════════════════════════════════════
+// CÁLCULO HORAS DE PARO
+// ══════════════════════════════════════════════
+function calcHoras(){
+  const fi = document.getElementById('f-fi').value;
+  const hi = document.getElementById('f-hi').value;
+  const ff = document.getElementById('f-ff').value;
+  const hf = document.getElementById('f-hf').value;
+  const el  = document.getElementById('comp-hrs');
+  const hid = document.getElementById('f-horas');
+
+  if(!fi){ el.innerHTML='<span style="color:var(--t3)">Complete las fechas para calcular</span>'; hid.value=''; return; }
+  if(!ff){ el.innerHTML='<span style="color:var(--t3)">Ingrese la fecha de finalización</span>'; hid.value=''; return; }
+
+  const dtI = new Date(`${fi}T${hi||'00:00'}`);
+  const dtF = new Date(`${ff}T${hf||'23:59'}`);
+  if(dtF <= dtI){ el.innerHTML='<span style="color:var(--rd)">⚠ La fecha de fin debe ser posterior al inicio</span>'; hid.value=''; return; }
+
+  const h    = ((dtF-dtI)/3600000).toFixed(1);
+  const dias = Math.ceil((dtF-dtI)/86400000);
+  hid.value  = h;
+  el.innerHTML = `<strong style="font-size:.94rem;color:var(--t1);">${h} horas</strong><span style="color:var(--t3);font-size:.73rem;margin-left:9px;">(${dias} día${dias!==1?'s':''} &nbsp;·&nbsp; ${fmtD(fi)} → ${fmtD(ff)})</span>`;
+  calcProx(); // actualizar próximo también
+}
+
+// ══════════════════════════════════════════════
+// CÁLCULO PRÓXIMO — POR HORAS DE USO
+// ══════════════════════════════════════════════
+function calcProx(){
+  const intv = parseFloat(document.getElementById('f-intv').value)||0;
+  const fi   = document.getElementById('f-fi').value;
+  const res  = document.getElementById('prx-res');
+  const el   = document.getElementById('f-intv');
+
+  if(!intv || !fi){
+    res.style.display = 'none';
+    delete el.dataset.pf; delete el.dataset.pd;
+    return;
+  }
+
+  // Convertir horas → días (redondeado) para estimar la fecha
+  const diasOp    = Math.ceil(intv / 8); // ~8 horas de uso por día
+  const base      = new Date(fi+'T00:00:00');
+  base.setDate(base.getDate() + diasOp);
+  const proxFecha = base.toISOString().split('T')[0];
+
+  // Diferencia respecto a HOY
+  const hoy  = new Date(); hoy.setHours(0,0,0,0);
+  const diff = Math.ceil((base - hoy)/86400000);
+  const eta  = diff < 0 ? `hace ${-diff} día${diff!==-1?'s':''}`
+             : diff === 0 ? '¡HOY!'
+             : diff === 1 ? 'mañana'
+             : `en ${diff} días`;
+
+  document.getElementById('px-d').textContent = intv + ' horas de uso';
+  document.getElementById('px-f').textContent = fmtD(proxFecha) + `  (${eta})`;
+  res.style.display = 'grid';
+
+  el.dataset.pf = proxFecha;
+  el.dataset.pd = diasOp;
+}
+
+// ══════════════════════════════════════════════
+// GUARDAR REGISTRO
+// ══════════════════════════════════════════════
+function guardar(){
+  const unidad = document.getElementById('f-un').value;
+  const fi     = document.getElementById('f-fi').value;
+  if(!unidad){ toast('Seleccione una unidad',true); return; }
+  if(!fi)    { toast('Ingrese la fecha de inicio',true); return; }
+
+  const ie    = document.getElementById('f-intv');
+  const horas = parseFloat(document.getElementById('f-horas').value)||0;
+
+  DB.unshift({
+    id:Date.now(),
+    fechaIni:fi, horaIni:document.getElementById('f-hi').value,
+    fechaFin:document.getElementById('f-ff').value, horaFin:document.getElementById('f-hf').value,
+    horas, unidad,
+    codigo:    document.getElementById('f-cod').value,
+    supervisor:document.getElementById('f-sup').value,
+    tipo:      document.querySelector('input[name=tipo]:checked').value,
+    categoria: document.getElementById('f-cat').value,
+    estado:    document.getElementById('f-est').value,
+    descripcion:document.getElementById('f-desc').value,
+    repuestos: document.getElementById('f-rep').value,
+    sale:      document.getElementById('f-sale').value,
+    obs:       document.getElementById('f-obs').value,
+    criticidad:document.getElementById('f-crit').value,
+    horometro: 0,
+    intervalo: parseFloat(ie.value)||0,
+    usoDia:    1,
+    proxDesc:  document.getElementById('f-pdesc').value,
+    proxHoro:  0,
+    proxFecha: ie.dataset.pf||'',
+    proxDias:  parseInt(ie.dataset.pd)||0,
+    fotos:     [...fotosB64],
+    ts:        new Date().toISOString(),
+  });
+
+  save();
+  toast('Registro guardado correctamente');
+  limpiarForm();
+  renderDash();
+}
+
+function limpiarForm(){
+  ['f-cod','f-sup','f-hi','f-ff','f-hf','f-desc','f-rep','f-obs',
+   'f-intv','f-pdesc','f-horas'].forEach(id=>{ const e=document.getElementById(id); if(e) e.value=''; });
+  document.getElementById('f-un').value   = '';
+  document.getElementById('f-cat').value  = '';
+  document.getElementById('f-est').value  = 'PROGRAMADO';
+  document.getElementById('f-sale').value = 'NO';
+  document.getElementById('f-crit').value = 'Informativo';
+  document.getElementById('comp-hrs').innerHTML = '<span style="color:var(--t3)">Complete las fechas para calcular</span>';
+  document.getElementById('prx-res').style.display = 'none';
+  document.getElementById('f-fi').value = todayStr();
+  document.querySelector('input[name=tipo]').checked = true;
+  fotosB64 = []; renderPrev();
+}
+
+// ══════════════════════════════════════════════
+// FOTOS
+// ══════════════════════════════════════════════
+function addFotos(input){
+  const files = Array.from(input.files);
+  if(fotosB64.length + files.length > 5){ toast('Máximo 5 fotografías',true); input.value=''; return; }
+  files.forEach(f=>{ const r=new FileReader(); r.onload=e=>{ fotosB64.push(e.target.result); renderPrev(); }; r.readAsDataURL(f); });
+  input.value = '';
+}
+function renderPrev(){
+  document.getElementById('pprev').innerHTML = fotosB64.map((s,i)=>`
+    <div class="pp"><img src="${s}" onclick="openLB('${s}')"><button class="ppdel" onclick="delf(${i})">✕</button></div>`).join('');
+}
+function delf(i){ fotosB64.splice(i,1); renderPrev(); }
+
+// ══════════════════════════════════════════════
+// DASHBOARD
+// ══════════════════════════════════════════════
+function renderDash(){
+  document.getElementById('k-total').textContent = DB.length;
+  document.getElementById('k-fp').textContent    = DB.filter(r=>r.sale==='SÍ').length;
+  document.getElementById('k-hrs').textContent   = DB.reduce((a,r)=>a+(r.horas||0),0).toFixed(1)+'h';
+  document.getElementById('k-prox').textContent  = DB.filter(r=>r.proxFecha).length;
+
+  // Flota
+  document.getElementById('fleet-grid').innerHTML = UNITS.map(u=>{
+    const cnt = DB.filter(r=>r.unidad===u.full).length;
+    const en  = DB.find(r=>r.unidad===u.full && ['EN PROCESO','PROGRAMADO'].includes(r.estado));
+    return `<div class="fc${en?' mant':''}" onclick="filterH('${u.full}')">
+      <div class="fc-ab">${u.id}</div>
+      <div class="fc-nm">${u.nm}</div>
+      <div class="fc-ct">${cnt} intervención${cnt!==1?'es':''}</div>
+      <div><span class="fst ${en?'mn':'op'}">● ${en?'En Mant.':'Operativo'}</span></div>
+    </div>`;
+  }).join('');
+
+  // Actividad
+  const al = document.getElementById('act-list');
+  if(!DB.length){ al.innerHTML='<p style="color:var(--t3);padding:14px;text-align:center;font-size:.74rem;">Sin registros aún.</p>'; }
+  else {
+    al.innerHTML = DB.slice(0,8).map(r=>{
+      const dc = r.tipo==='Emergencia'?'ar':r.tipo==='Correctivo'?'aa':'ab';
+      return `<div class="ai"><div class="adot ${dc}"></div>
+        <div style="flex:1;"><div class="at1">${r.unidad} — ${r.tipo}</div>
+        <div class="at2">${r.categoria||'—'} · Sup: ${r.supervisor||'—'} · ${r.horas}h paro</div></div>
+        <div class="atm">${fmtD(r.fechaIni)}</div></div>`;
+    }).join('');
+  }
+
+  renderNextList();
+}
+
+function renderNextList(){
+  const el  = document.getElementById('next-list');
+  const map = {};
+  DB.filter(r=>r.proxFecha).forEach(r=>{ if(!map[r.unidad]||r.horometro>map[r.unidad].horometro) map[r.unidad]=r; });
+  const items = Object.values(map);
+  if(!items.length){ el.innerHTML='<p style="color:var(--t3);padding:10px;font-size:.74rem;">Sin mantenimientos programados con fecha estimada.</p>'; return; }
+
+  const hoy = new Date(); hoy.setHours(0,0,0,0);
+  el.innerHTML = items.map(r=>{
+    const pf   = new Date(r.proxFecha+'T00:00:00');
+    const diff = Math.ceil((pf-hoy)/86400000);
+    const cls  = diff<0?'cur':diff<=7?'cwn':'cok';
+    const pfcls= diff<0?'pur':diff<=7?'pwn':'pok';
+    const msg  = diff<0?`Vencido ${-diff}d`:diff===0?'¡HOY!':diff===1?'Mañana':`${diff} días`;
+    const pct  = r.proxDias ? Math.min(100,Math.max(0,((r.proxDias - Math.max(0,diff))/r.proxDias)*100)) : 50;
+    return `<div class="nmi">
+      <div class="nml">
+        <div class="nmu">${r.unidad} <span style="font-size:.63rem;color:var(--t3);font-weight:400;">${r.codigo||''}</span></div>
+        <div class="nmd">${r.proxDesc||'Mantenimiento programado'} · Intervalo: ${r.intervalo} horas</div>
+        <div class="pbg"><div class="pbf ${pfcls}" style="width:${pct}%;"></div></div>
+      </div>
+      <div style="text-align:right;">
+        <div class="chip ${cls}">${msg}</div>
+        <div style="font-size:.61rem;color:var(--t3);margin-top:2px;">📅 ${fmtD(r.proxFecha)}</div>
+      </div>
+    </div>`;
+  }).join('');
+}
+
+// ══════════════════════════════════════════════
+// HISTORIAL
+// ══════════════════════════════════════════════
+function renderHist(){
+  const fu = document.getElementById('h-un').value;
+  const ft = document.getElementById('h-tp').value;
+  const tx = (document.getElementById('h-tx').value||'').toLowerCase();
+  const data = DB.filter(r=>(!fu||r.unidad===fu)&&(!ft||r.tipo===ft)&&(!tx||JSON.stringify(r).toLowerCase().includes(tx)));
+  const tb = document.getElementById('hbody');
+  if(!data.length){ tb.innerHTML='<tr><td colspan="14" style="text-align:center;padding:20px;color:var(--t3);">Sin registros.</td></tr>'; return; }
+
+  tb.innerHTML = data.map(r=>{
+    const idx = DB.indexOf(r);
+    const n   = String(idx+1).padStart(4,'0');
+    return `<tr>
+      <td><span style="font-family:'IBM Plex Mono',monospace;font-size:.68rem;color:var(--t2);">#${n}</span></td>
+      <td>${fmtD(r.fechaIni)}<br><span style="font-size:.6rem;color:var(--t3);">${r.horaIni||''}</span></td>
+      <td>${fmtD(r.fechaFin)}<br><span style="font-size:.6rem;color:var(--t3);">${r.horaFin||''}</span></td>
+      <td><strong style="font-size:.76rem;">${r.unidad}</strong></td>
+      <td style="font-family:'IBM Plex Mono',monospace;font-size:.68rem;">${r.codigo||'—'}</td>
+      <td><span class="bdg ${TB[r.tipo]||'bds'}">${r.tipo}</span></td>
+      <td style="font-size:.68rem;">${r.categoria||'—'}</td>
+      <td>${r.supervisor||'—'}</td>
+      <td style="font-family:'IBM Plex Mono',monospace;font-weight:600;color:var(--am);">${r.horas}h</td>
+      <td style="text-align:center;">${r.sale==='SÍ'?'<span class="bdg bda">SÍ</span>':'—'}</td>
+      <td><span class="bdg ${EB[r.estado]||'bds'}">${r.estado}</span></td>
+      <td><span class="bdg ${CB[r.criticidad]||'bds'}">${r.criticidad||'—'}</span></td>
+      <td style="text-align:center;">${r.fotos&&r.fotos.length?`<span style="cursor:pointer;color:var(--ac);font-size:.71rem;" onclick='showFs(${JSON.stringify(r.fotos)})'>📷 ${r.fotos.length}</span>`:'—'}</td>
+      <td><div style="display:flex;gap:3px;">
+        <button class="btn bg bsm" onclick="verDet(${idx})">Ver</button>
+        <button class="btn bg bsm" onclick="editReg(${idx})">✏</button>
+        <button class="btn bd bsm" onclick="delReg(${idx})">✕</button>
+      </div></td>
+    </tr>`;
+  }).join('');
+}
+
+function filterH(u){ document.getElementById('h-un').value=u; goTab('historial',document.querySelectorAll('.nb')[2]); }
+
+// ══════════════════════════════════════════════
+// DETALLE
+// ══════════════════════════════════════════════
+function verDet(idx){
+  const r = DB[idx]; const n = String(idx+1).padStart(4,'0');
+  document.getElementById('det-ttl').textContent = `Registro #${n} — ${r.unidad}`;
+  document.getElementById('det-body').innerHTML = `
+    <div class="dg">
+      <div class="dgi"><label>F. Inicio</label><div class="dgv">${fmtD(r.fechaIni)} ${r.horaIni||''}</div></div>
+      <div class="dgi"><label>F. Fin</label><div class="dgv">${r.fechaFin?fmtD(r.fechaFin)+' '+(r.horaFin||''):'—'}</div></div>
+      <div class="dgi"><label>Horas de Paro</label><div class="dgv" style="color:var(--am);font-weight:700;font-family:'IBM Plex Mono',monospace;">${r.horas}h</div></div>
+      <div class="dgi"><label>Tipo</label><div class="dgv"><span class="bdg ${TB[r.tipo]||'bds'}">${r.tipo}</span></div></div>
+      <div class="dgi"><label>Estado</label><div class="dgv"><span class="bdg ${EB[r.estado]||'bds'}">${r.estado}</span></div></div>
+      <div class="dgi"><label>Sale de Planta</label><div class="dgv">${r.sale}</div></div>
+      <div class="dgi"><label>Supervisor</label><div class="dgv">${r.supervisor||'—'}</div></div>
+      <div class="dgi"><label>Criticidad</label><div class="dgv"><span class="bdg ${CB[r.criticidad]||'bds'}">${r.criticidad}</span></div></div>
+    </div>
+    <div style="margin-bottom:10px;"><label style="font-size:.6rem;font-weight:500;color:var(--t3);text-transform:uppercase;display:block;margin-bottom:2px;">Descripción</label>
+    <div style="font-size:.77rem;line-height:1.7;background:var(--bg2);padding:8px 10px;border-radius:var(--r);color:var(--t2);">${r.descripcion||'—'}</div></div>
+    <div style="margin-bottom:10px;"><label style="font-size:.6rem;font-weight:500;color:var(--t3);text-transform:uppercase;display:block;margin-bottom:2px;">Repuestos y Materiales</label>
+    <div style="font-size:.77rem;line-height:1.7;background:var(--bg2);padding:8px 10px;border-radius:var(--r);color:var(--t2);">${r.repuestos||'—'}</div></div>
+    ${r.obs?`<div style="background:var(--rd-s);border:1px solid rgba(217,69,69,.2);border-radius:var(--r);padding:10px;margin-bottom:10px;">
+      <div style="font-size:.6rem;font-weight:600;color:var(--rd);text-transform:uppercase;margin-bottom:3px;">Observaciones — ${r.criticidad}</div>
+      <div style="font-size:.77rem;line-height:1.7;">${r.obs}</div></div>`:''}
+    ${r.proxFecha?`<div style="background:var(--ac-s);border:1px solid rgba(74,120,240,.2);border-radius:var(--r);padding:10px;margin-bottom:10px;">
+      <div style="font-size:.6rem;font-weight:600;color:var(--ac);text-transform:uppercase;margin-bottom:7px;">🔧 Próximo Mantenimiento Programado</div>
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;text-align:center;">
+        <div><div style="font-size:.59rem;color:var(--t3);">Descripción</div><div style="font-size:.78rem;font-weight:500;">${r.proxDesc||'Mant. programado'}</div></div>
+        <div><div style="font-size:.59rem;color:var(--t3);">📅 Fecha Estimada</div><div style="font-size:.9rem;font-weight:700;color:var(--gr);">${fmtD(r.proxFecha)}</div></div>
+      </div></div>`:''}
+    ${r.fotos&&r.fotos.length?`<div><label style="font-size:.6rem;font-weight:500;color:var(--t3);text-transform:uppercase;display:block;margin-bottom:6px;">Evidencia Fotográfica (${r.fotos.length})</label>
+    <div style="display:flex;gap:7px;flex-wrap:wrap;">${r.fotos.map(s=>`<div style="width:110px;height:82px;border-radius:var(--r);overflow:hidden;border:1px solid var(--b1);cursor:pointer;" onclick="openLB('${s}')"><img src="${s}" style="width:100%;height:100%;object-fit:cover;"></div>`).join('')}</div></div>`:''}`;
+  openOv('ov-det');
+}
+
+// ══════════════════════════════════════════════
+// EDITAR
+// ══════════════════════════════════════════════
+function editReg(idx){
+  editIdx = idx; const r = DB[idx];
+  const T=['Preventivo','Correctivo','Predictivo','Emergencia'];
+  const E=['PROGRAMADO','EN PROCESO','COMPLETADO','PENDIENTE'];
+  const C=['Informativo','Advertencia','Crítico'];
+  document.getElementById('edit-body').innerHTML = `
+    <div class="gg g2" style="gap:9px;">
+      <div class="fg"><label class="fl">F. Inicio</label><input id="e-fi" type="date" value="${r.fechaIni||''}"></div>
+      <div class="fg"><label class="fl">Hora Inicio</label><input id="e-hi" type="time" value="${r.horaIni||''}"></div>
+      <div class="fg"><label class="fl">F. Fin</label><input id="e-ff" type="date" value="${r.fechaFin||''}"></div>
+      <div class="fg"><label class="fl">Hora Fin</label><input id="e-hf" type="time" value="${r.horaFin||''}"></div>
+      <div class="fg"><label class="fl">Unidad</label><select id="e-un">${['CARGADOR FRONTAL','TRACTOR','CISTERNA','BARREDORA','VOLQUETE'].map(u=>`<option ${r.unidad===u?'selected':''}>${u}</option>`).join('')}</select></div>
+      <div class="fg"><label class="fl">Código</label><input id="e-cod" type="text" value="${r.codigo||''}"></div>
+      <div class="fg"><label class="fl">Supervisor</label><input id="e-sup" type="text" value="${r.supervisor||''}"></div>
+      <div class="fg"><label class="fl">Tipo</label><select id="e-tp">${T.map(t=>`<option ${r.tipo===t?'selected':''}>${t}</option>`).join('')}</select></div>
+      <div class="fg"><label class="fl">Estado</label><select id="e-es">${E.map(t=>`<option ${r.estado===t?'selected':''}>${t}</option>`).join('')}</select></div>
+      <div class="fg"><label class="fl">Sale Planta</label><select id="e-sl"><option ${r.sale==='NO'?'selected':''}>NO</option><option ${r.sale==='SÍ'?'selected':''}>SÍ</option></select></div>
+      <div class="fg"><label class="fl">Criticidad</label><select id="e-cr">${C.map(c=>`<option ${r.criticidad===c?'selected':''}>${c}</option>`).join('')}</select></div>
+      <div class="fg" style="display:none;"><input id="e-ho" type="number" value="0"></div>
+      <div class="fg"><label class="fl">Intervalo (horas)</label><input id="e-in" type="number" value="${r.intervalo||0}"></div>
+      <div class="fg" style="display:none;"><input id="e-us" type="number" value="1"></div>
+      <div class="fg"><label class="fl">Desc. próximo</label><input id="e-pd" type="text" value="${r.proxDesc||''}"></div>
+    </div>
+    <div class="fg" style="margin-top:9px;"><label class="fl">Descripción</label><textarea id="e-ds">${r.descripcion||''}</textarea></div>
+    <div class="fg" style="margin-top:7px;"><label class="fl">Repuestos</label><textarea id="e-rp" style="min-height:52px;">${r.repuestos||''}</textarea></div>
+    <div class="fg" style="margin-top:7px;"><label class="fl">Observaciones</label><textarea id="e-ob">${r.obs||''}</textarea></div>`;
+  openOv('ov-edit');
+}
+
+function saveEdit(){
+  if(editIdx<0) return;
+  const r = DB[editIdx];
+  r.fechaIni   = document.getElementById('e-fi').value;
+  r.horaIni    = document.getElementById('e-hi').value;
+  r.fechaFin   = document.getElementById('e-ff').value;
+  r.horaFin    = document.getElementById('e-hf').value;
+  r.unidad     = document.getElementById('e-un').value;
+  r.codigo     = document.getElementById('e-cod').value;
+  r.supervisor = document.getElementById('e-sup').value;
+  r.tipo       = document.getElementById('e-tp').value;
+  r.estado     = document.getElementById('e-es').value;
+  r.sale       = document.getElementById('e-sl').value;
+  r.criticidad = document.getElementById('e-cr').value;
+  r.horometro  = parseFloat(document.getElementById('e-ho').value)||0;
+  r.intervalo  = parseFloat(document.getElementById('e-in').value)||0;
+  r.usoDia     = parseFloat(document.getElementById('e-us').value)||0;
+  r.proxDesc   = document.getElementById('e-pd').value;
+  r.descripcion= document.getElementById('e-ds').value;
+  r.repuestos  = document.getElementById('e-rp').value;
+  r.obs        = document.getElementById('e-ob').value;
+
+  // Recalcular horas paro
+  if(r.fechaIni && r.fechaFin){
+    const i = new Date(`${r.fechaIni}T${r.horaIni||'00:00'}`);
+    const f = new Date(`${r.fechaFin}T${r.horaFin||'23:59'}`);
+    if(f>i) r.horas = +((f-i)/3600000).toFixed(1);
+  }
+  // Recalcular próximo por horas de uso
+  if(r.intervalo && r.fechaIni){
+    r.proxHoro  = 0;
+    const d     = Math.ceil(r.intervalo / 8); // ~8 horas de uso por día
+    const base  = new Date(r.fechaIni+'T00:00:00');
+    base.setDate(base.getDate()+d);
+    r.proxFecha = base.toISOString().split('T')[0];
+    r.proxDias  = d;
+    r.usoDia    = 1;
+  }
+
+  save(); closeOv('ov-edit');
+  toast('Registro actualizado');
+  renderHist(); renderDash();
+}
+
+function delReg(idx){
+  if(!confirm('¿Eliminar este registro?')) return;
+  DB.splice(idx,1); save(); renderHist(); renderDash();
+  toast('Registro eliminado');
+}
+
+// ══════════════════════════════════════════════
+// ESTADÍSTICAS — LÓGICA PRINCIPAL
+// ══════════════════════════════════════════════
+function setKf(btn, v){
+  document.querySelectorAll('.kfb').forEach(b=>b.classList.remove('active'));
+  btn.classList.add('active'); kfUnit = v; renderStats();
+}
+
+function setMetric(btn, v){
+  document.querySelectorAll('.mtb').forEach(b=>b.classList.remove('active'));
+  btn.classList.add('active'); statMetric = v; renderStats();
+}
+
+function setStatTab(btn, v){
+  document.querySelectorAll('.stab').forEach(b=>b.classList.remove('active'));
+  document.querySelectorAll('.stat-panel').forEach(p=>p.classList.remove('active'));
+  btn.classList.add('active');
+  document.getElementById('sp-'+v).classList.add('active');
+  statTab = v;
+  renderMainChart();
+}
+
+function getFiltrado(){ return kfUnit ? DB.filter(r=>r.unidad===kfUnit) : DB; }
+function metricVal(r){ return statMetric==='horas' ? (r.horas||0) : 1; }
+const metricLabel = () => statMetric==='horas' ? 'Horas de Paro' : 'Intervenciones';
+
+function renderStats(){
+  const data = getFiltrado();
+  document.getElementById('ks-t').textContent = data.length;
+  document.getElementById('ks-h').textContent = data.reduce((a,r)=>a+(r.horas||0),0).toFixed(1)+'h';
+  document.getElementById('ks-f').textContent = data.filter(r=>r.sale==='SÍ').length;
+  document.getElementById('ks-c').textContent = data.filter(r=>r.estado==='COMPLETADO').length;
+  renderMainChart();
+  renderMiniCharts();
+  renderSupTable(data);
+}
+
+// ── Gráfico principal según el tab activo ──
+function renderMainChart(){
+  if(statTab==='unidad') renderUnidad();
+  else if(statTab==='mes') renderMes();
+  else renderDia();
+}
+
+function mkBar(id, labels, datasets, stacked=false){
+  if(charts[id]) charts[id].destroy();
+  const ctx = document.getElementById(id); if(!ctx) return;
+  const opts = JSON.parse(JSON.stringify(CHART_DEFAULTS));
+  opts.scales.x.stacked = stacked;
+  opts.scales.y.stacked = stacked;
+  opts.interaction = {mode:'index',intersect:false};
+  opts.plugins.legend.labels.padding = 14;
+  charts[id] = new Chart(ctx,{type:'bar', data:{labels,datasets}, options:opts});
+}
+
+function mkLine(id, labels, datasets){
+  if(charts[id]) charts[id].destroy();
+  const ctx = document.getElementById(id); if(!ctx) return;
+  const opts = JSON.parse(JSON.stringify(CHART_DEFAULTS));
+  opts.interaction = {mode:'index',intersect:false};
+  opts.plugins.legend.labels.padding = 14;
+  charts[id] = new Chart(ctx,{type:'line', data:{labels,datasets}, options:opts});
+}
+
+// Por Unidad — barras AGRUPADAS: eje X = unidades, series = tipo de mantenimiento
+function renderUnidad(){
+  const data   = getFiltrado();
+  const labels = UNITS.map(u => u.nm);
+  const TIPOS  = ['Preventivo','Correctivo','Predictivo','Emergencia'];
+
+  const datasets = TIPOS.map((tp, i) => ({
+    label: tp,
+    data: UNITS.map(u =>
+      data.filter(r => r.unidad === u.full && r.tipo === tp)
+           .reduce((a, r) => a + metricVal(r), 0)
+    ),
+    backgroundColor: PAL_TIPO_A[i],
+    borderColor:     PAL_TIPO[i],
+    borderWidth: 1.5,
+    borderRadius: 4,
+    borderSkipped: false,
+  }));
+  mkBar('ch-unidad', labels, datasets, false);
+}
+
+// Por Mes — líneas, una por unidad
+function renderMes(){
+  const data   = getFiltrado();
+  const meses  = ['Ene','Feb','Mar','Abr','May','Jun','Jul','Ago','Sep','Oct','Nov','Dic'];
+  const datasets = UNITS.map((u,i)=>{
+    const mc = Array(12).fill(0);
+    data.filter(r=>r.unidad===u.full && r.fechaIni).forEach(r=>{
+      const m = parseInt(r.fechaIni.split('-')[1])-1;
+      mc[m] += metricVal(r);
+    });
+    return {
+      label: u.nm, data: mc,
+      borderColor: PAL[i],
+      backgroundColor: PAL_A[i],
+      borderWidth: 2,
+      pointBackgroundColor: PAL[i],
+      pointRadius: 4,
+      pointHoverRadius: 6,
+      fill: false, tension: .35,
+    };
+  });
+  mkLine('ch-mes', meses, datasets);
+}
+
+// Por Día — barras apiladas por hora del día, una serie por unidad
+function renderDia(){
+  const diaStr = document.getElementById('dp-dia').value;
+  const label  = diaStr ? `${fmtD(diaStr)}` : 'Sin fecha seleccionada';
+  document.getElementById('dp-label').textContent = diaStr ? `— ${label}` : '';
+
+  const dayData = DB.filter(r=>r.fechaIni===diaStr && (!kfUnit || r.unidad===kfUnit));
+  const horas24 = Array.from({length:24},(_,i)=>`${String(i).padStart(2,'0')}:00`);
+
+  const datasets = UNITS.map((u,i)=>{
+    const vals = Array(24).fill(0);
+    dayData.filter(r=>r.unidad===u.full && r.horaIni).forEach(r=>{
+      const h = parseInt(r.horaIni.split(':')[0]);
+      vals[h] += metricVal(r);
+    });
+    return {
+      label: u.nm, data: vals,
+      backgroundColor: PAL_A[i],
+      borderColor: PAL[i],
+      borderWidth: 1,
+      borderRadius: 4,
+      borderSkipped: false,
+    };
+  });
+
+  mkBar('ch-dia', horas24, datasets, true);
+}
+
+function navDia(dir){
+  const inp = document.getElementById('dp-dia');
+  const d   = inp.value ? new Date(inp.value+'T00:00:00') : new Date();
+  d.setDate(d.getDate()+dir);
+  inp.value = d.toISOString().split('T')[0];
+  renderDia();
+}
+
+// ── Helpers de gráficos ──
+function mkGroupedBar(id, labels, datasets, opts={}){
+  if(charts[id]) charts[id].destroy();
+  const ctx = document.getElementById(id); if(!ctx) return;
+  const base = JSON.parse(JSON.stringify(CHART_DEFAULTS));
+  base.scales.x.stacked = opts.stacked||false;
+  base.scales.y.stacked = opts.stacked||false;
+  if(opts.horizontal){
+    base.indexAxis = 'y';
+    base.scales.x.ticks = {color:'#8898aa',font:{size:10}};
+    base.scales.y.ticks = {color:'#4a5568',font:{size:10},maxTicksLimit:10};
+  }
+  base.plugins.legend.display = opts.legend!==false;
+  base.interaction = {mode:'index', intersect:false};
+  charts[id] = new Chart(ctx,{type:'bar', data:{labels, datasets}, options:base});
+}
+
+function renderMiniCharts(){
+  const data   = getFiltrado();
+  const UNITS  = ['CARGADOR FRONTAL','TRACTOR','CISTERNA','BARREDORA','VOLQUETE'];
+  const UNMS   = ['Carg. Frontal','Tractor','Cisterna','Barredora','Volquete'];
+  const TIPOS  = ['Preventivo','Correctivo','Predictivo','Emergencia'];
+  const ESTS   = ['COMPLETADO','EN PROCESO','PROGRAMADO','PENDIENTE'];
+  const TCLRS  = ['#cc1a1a','#c06010','#6a40c0','#d94545'];
+  const ECLRS  = ['#1a7a45','#1a5fa0','#c06010','#8898aa'];
+
+  // ── 1. TIPO — donut central ─────────────────────────────────────────────────
+  {
+    if(charts['ch-tp']) charts['ch-tp'].destroy();
+    const ctx = document.getElementById('ch-tp');
+    if(ctx){
+      const vals = TIPOS.map(tp => data.filter(r=>r.tipo===tp).length);
+      const clrs = ['#1a5fa0','#cc1a1a','#6a40c0','#c06010'];
+      charts['ch-tp'] = new Chart(ctx,{
+        type:'doughnut',
+        data:{ labels:TIPOS, datasets:[{data:vals, backgroundColor:clrs.map(x=>x+'bb'), borderColor:clrs, borderWidth:2, hoverOffset:6}] },
+        options:{
+          ...DOUGHNUT_DEFAULTS,
+          plugins:{
+            ...DOUGHNUT_DEFAULTS.plugins,
+            legend:{ display:true, position:'bottom', labels:{ color:'#4a5568', font:{size:11,family:'Inter'}, boxWidth:12, boxHeight:12, padding:10 } },
+          }
+        }
+      });
+    }
+  }
+
+  // ── 2. ESTADO por unidad — barras apiladas ────────────────────────────────
+  const estDatasets = ESTS.map((es,i)=>({
+    label: es,
+    data:  UNITS.map(u => data.filter(r=>r.unidad===u && r.estado===es).length),
+    backgroundColor: ECLRS[i]+'aa',
+    borderColor:     ECLRS[i],
+    borderWidth: 1, borderRadius: 3, borderSkipped:false,
+  }));
+  mkGroupedBar('ch-est', UNMS, estDatasets, {stacked:true});
+
+  // ── 3. HORAS DE PARO por categoría — barras horizontales ─────────────────
+  const catDefs = [
+    {lbl:'Falla mecánica',     kw:'mecánica'},
+    {lbl:'Falla eléctrica',    kw:'eléctrica'},
+    {lbl:'Falla hidráulica',   kw:'hidráulica'},
+    {lbl:'Cambio aceite',      kw:'Cambio'},
+    {lbl:'Mant. programado',   kw:'programado'},
+    {lbl:'Revisión general',   kw:'general'},
+    {lbl:'Falla de motor',     kw:'motor'},
+    {lbl:'Frenos',             kw:'frenos'},
+    {lbl:'Transmisión',        kw:'transmisión'},
+    {lbl:'Otro',               kw:'Otro'},
+  ];
+  const catLabels = catDefs.map(d=>d.lbl);
+  const catHrs    = catDefs.map(d=>
+    +data.filter(r=>(r.categoria||'').toLowerCase().includes(d.kw.toLowerCase()))
+         .reduce((a,r)=>a+(r.horas||0),0).toFixed(1)
+  );
+  const catColors = ['#cc1a1a','#c06010','#1a5fa0','#1a7a45','#6a40c0','#2cb4cc','#d9920e','#d94545','#28c99a','#8898aa'];
+  mkGroupedBar('ch-cat', catLabels,
+    [{
+      label:'Horas de paro',
+      data: catHrs,
+      backgroundColor: catColors.map(x=>x+'bb'),
+      borderColor:     catColors,
+      borderWidth:1, borderRadius:4, borderSkipped:false,
+    }],
+    {horizontal:true, legend:false}
+  );
+
+  // ── 4. EN SITIO vs PLANTA EXTERNA por unidad — barras apiladas ───────────
+  const fpDatasets = [
+    {
+      label:'En sitio (planta)',
+      data: UNITS.map(u=>data.filter(r=>r.unidad===u && r.sale!=='SÍ').reduce((a,r)=>a+(r.horas||0),0).toFixed(1)*1),
+      backgroundColor:'#1a7a45aa', borderColor:'#1a7a45',
+      borderWidth:1, borderRadius:3, borderSkipped:false,
+    },
+    {
+      label:'Taller externo',
+      data: UNITS.map(u=>data.filter(r=>r.unidad===u && r.sale==='SÍ').reduce((a,r)=>a+(r.horas||0),0).toFixed(1)*1),
+      backgroundColor:'#c06010aa', borderColor:'#c06010',
+      borderWidth:1, borderRadius:3, borderSkipped:false,
+    },
+  ];
+  mkGroupedBar('ch-fp', UNMS, fpDatasets, {stacked:true});
+}
+
+function renderSupTable(data){
+  const sm = {};
+  data.forEach(r=>{
+    const s = r.supervisor||'Sin asignar';
+    if(!sm[s]) sm[s]={n:0,h:0,c:0,p:0,k:0};
+    sm[s].n++; sm[s].h+=r.horas||0;
+    if(r.estado==='COMPLETADO') sm[s].c++;
+    if(r.estado==='PENDIENTE')  sm[s].p++;
+    if(r.criticidad==='Crítico'&&r.obs) sm[s].k++;
+  });
+  const se = Object.entries(sm);
+  document.getElementById('supbody').innerHTML = se.length
+    ? se.map(([s,v])=>`<tr>
+        <td><strong style="color:var(--t1);">${s}</strong></td>
+        <td style="font-family:'IBM Plex Mono',monospace;">${v.n}</td>
+        <td style="font-family:'IBM Plex Mono',monospace;color:var(--am);">${v.h.toFixed(1)}h</td>
+        <td style="color:var(--gr);">${v.c}</td>
+        <td style="color:var(--am);">${v.p}</td>
+        <td style="color:var(--rd);">${v.k}</td>
+      </tr>`).join('')
+    : '<tr><td colspan="6" style="text-align:center;padding:14px;color:var(--t3);">Sin datos.</td></tr>';
+}
+
+// ══════════════════════════════════════════════
+// PROGRAMADOS
+// ══════════════════════════════════════════════
+function renderProg(){
+  const map = {};
+  DB.filter(r=>r.proxFecha).forEach(r=>{ if(!map[r.unidad]||r.horometro>map[r.unidad].horometro) map[r.unidad]=r; });
+  const el    = document.getElementById('proglist');
+  const items = Object.values(map);
+  if(!items.length){ el.innerHTML='<p style="color:var(--t3);padding:14px;font-size:.74rem;">Sin programados con fecha estimada.</p>'; return; }
+
+  const hoy = new Date(); hoy.setHours(0,0,0,0);
+  el.innerHTML = items.map(r=>{
+    const pf   = new Date(r.proxFecha+'T00:00:00');
+    const diff = Math.ceil((pf-hoy)/86400000);
+    const cls  = diff<0?'pur':diff<=7?'pwn':'pok';
+    const cc   = diff<0?'cur':diff<=7?'cwn':'cok';
+    const pct  = r.proxDias ? Math.min(100,Math.max(0,((r.proxDias - Math.max(0,diff))/r.proxDias)*100)) : 50;
+    const msg  = diff<0?`Vencido hace ${-diff} días`:diff===0?'¡HOY!':diff===1?'Mañana':`En ${diff} días`;
+    return `<div class="pc">
+      <div style="font-family:'IBM Plex Mono',monospace;font-size:.78rem;font-weight:700;color:var(--ac);min-width:24px;">${r.unidad.substring(0,2)}</div>
+      <div class="pci">
+        <div class="pcu">${r.unidad} <span style="font-size:.63rem;color:var(--t3);font-weight:400;">${r.codigo||''}</span></div>
+        <div class="pcs">${r.proxDesc||'Mantenimiento programado'}</div>
+        <div class="pcs" style="margin-top:1px;">
+          Intervalo: <span style="color:var(--t1);">${r.intervalo} horas</span>
+          &nbsp;·&nbsp; Registrado: <span style="color:var(--ac);">${fmtD(r.fechaIni)}</span>
+        </div>
+        <div style="margin-top:5px;max-width:280px;"><div class="pbg"><div class="pbf ${cls}" style="width:${pct}%;"></div></div></div>
+      </div>
+      <div style="text-align:right;min-width:95px;">
+        <div class="chip ${cc}">${msg}</div>
+        <div style="font-size:.61rem;color:var(--t3);margin-top:3px;">📅 ${fmtD(r.proxFecha)}</div>
+        <div style="font-size:.6rem;color:var(--t3);margin-top:1px;">~${r.intervalo} horas de uso</div>
+      </div>
+    </div>`;
+  }).join('');
+}
+
+// ══════════════════════════════════════════════
+// OBSERVACIONES
+// ══════════════════════════════════════════════
+function renderObs(){
+  const fc   = document.getElementById('obs-cr').value;
+  const fu   = document.getElementById('obs-un').value;
+  const data = DB.filter(r=>r.obs&&(!fc||r.criticidad===fc)&&(!fu||r.unidad===fu));
+  const el   = document.getElementById('obslist');
+  if(!data.length){ el.innerHTML='<p style="color:var(--t3);padding:20px;text-align:center;font-size:.74rem;">Sin observaciones.</p>'; return; }
+
+  el.innerHTML = data.map(r=>{
+    const cls = r.criticidad==='Crítico'?'crit':r.criticidad==='Advertencia'?'adv':'inf';
+    return `<div class="obs-item ${cls}">
+      <div style="display:flex;justify-content:space-between;align-items:flex-start;flex-wrap:wrap;gap:6px;margin-bottom:6px;">
+        <div><strong style="font-size:.82rem;">${r.unidad}</strong><span style="font-size:.66rem;color:var(--t3);margin-left:7px;">${fmtD(r.fechaIni)} · Sup: ${r.supervisor||'—'}</span></div>
+        <span class="bdg ${CB[r.criticidad]||'bds'}">${r.criticidad}</span>
+      </div>
+      <div style="font-size:.77rem;line-height:1.7;color:var(--t2);">${r.obs}</div>
+      ${r.fotos&&r.fotos.length?`<div style="display:flex;gap:6px;flex-wrap:wrap;margin-top:8px;">${r.fotos.map(s=>`<div style="width:70px;height:56px;border-radius:4px;overflow:hidden;border:1px solid var(--b1);cursor:pointer;" onclick="openLB('${s}')"><img src="${s}" style="width:100%;height:100%;object-fit:cover;"></div>`).join('')}</div>`:''}
+    </div>`;
+  }).join('');
+}
+
+// ══════════════════════════════════════════════
+// CALENDARIO
+// ══════════════════════════════════════════════
+function calNav(d){ calM+=d; if(calM>11){calM=0;calY++;} if(calM<0){calM=11;calY--;} renderCal(); }
+
+function renderCal(){
+  const M=['Enero','Febrero','Marzo','Abril','Mayo','Junio','Julio','Agosto','Septiembre','Octubre','Noviembre','Diciembre'];
+  document.getElementById('cal-ttl').textContent = `${M[calM]} ${calY}`;
+  const D=['Dom','Lun','Mar','Mié','Jue','Vie','Sáb'];
+  document.getElementById('cal-lbls').innerHTML = D.map(d=>`<div class="cal-dl">${d}</div>`).join('');
+
+  const first = new Date(calY,calM,1).getDay();
+  const dim   = new Date(calY,calM+1,0).getDate();
+  const dipm  = new Date(calY,calM,0).getDate();
+  const tod   = todayStr();
+  let h='';
+
+  for(let i=first-1;i>=0;i--) h+=`<div class="cal-c other"><div class="cal-n">${dipm-i}</div></div>`;
+  for(let d=1;d<=dim;d++){
+    const ds = `${calY}-${String(calM+1).padStart(2,'0')}-${String(d).padStart(2,'0')}`;
+    const rr = DB.filter(r=>r.fechaIni===ds);
+    h+=`<div class="cal-c${ds===tod?' today':''}"><div class="cal-n">${d}</div>${rr.slice(0,3).map(r=>{
+      const cl=r.tipo==='Emergencia'?'cee':r.tipo==='Correctivo'?'cec':'cep';
+      return `<div class="ce ${cl}">${r.unidad.substring(0,3)}</div>`;
+    }).join('')}</div>`;
+  }
+  const tot=first+dim; const rem=tot%7===0?0:7-(tot%7);
+  for(let i=1;i<=rem;i++) h+=`<div class="cal-c other"><div class="cal-n">${i}</div></div>`;
+  document.getElementById('cal-cells').innerHTML=h;
+}
+
+// ══════════════════════════════════════════════
+// REPORTES PDF
+// ══════════════════════════════════════════════
+function genPDF(){
+  const u = document.getElementById('pdf-un').value;
+  const d = document.getElementById('pdf-d').value;
+  const h = document.getElementById('pdf-h').value;
+  const data = DB.filter(r=>(!u||r.unidad===u)&&(!d||r.fechaIni>=d)&&(!h||r.fechaIni<=h));
+  buildPDF(data, u||'TODAS LAS UNIDADES', d, h);
+}
+
+function genSemanal(){
+  const hoy  = new Date(); hoy.setHours(0,0,0,0);
+  const hace7= new Date(hoy); hace7.setDate(hace7.getDate()-7);
+  const d    = hace7.toISOString().split('T')[0];
+  const h    = hoy.toISOString().split('T')[0];
+  document.getElementById('pdf-d').value = d;
+  document.getElementById('pdf-h').value = h;
+  document.getElementById('pdf-un').value = '';
+  buildPDF(DB.filter(r=>r.fechaIni>=d&&r.fechaIni<=h), 'TODAS LAS UNIDADES — REPORTE SEMANAL', d, h);
+}
+
+function buildPDF(data, titulo, desde, hasta){
+  const hrsT  = data.reduce((a,r)=>a+(r.horas||0),0);
+  const comp  = data.filter(r=>r.estado==='COMPLETADO').length;
+  const crits = data.filter(r=>r.criticidad==='Crítico').length;
+  const map   = {};
+  DB.filter(r=>r.proxFecha).forEach(r=>{ if(!map[r.unidad]||r.horometro>map[r.unidad].horometro) map[r.unidad]=r; });
+  const progs = Object.values(map);
+  const hoyN  = new Date(); hoyN.setHours(0,0,0,0);
+
+  document.getElementById('pdf-content').innerHTML = `
+  <div style="font-family:Inter,sans-serif;color:#1e2535;max-width:900px;margin:0 auto;">
+    <div style="background:#0c1020;color:#b8c8de;padding:22px 26px;border-radius:10px;margin-bottom:18px;">
+      <div style="display:flex;justify-content:space-between;align-items:flex-start;flex-wrap:wrap;gap:10px;">
+        <div>
+          <div style="font-size:.58rem;letter-spacing:1.5px;opacity:.5;text-transform:uppercase;margin-bottom:3px;">Pacasmayo · Sistema de Gestión de Mantenimiento Industrial</div>
+          <div style="font-size:1.2rem;font-weight:700;color:#fff;">${titulo}</div>
+          <div style="font-size:.73rem;opacity:.6;margin-top:3px;">Período: ${desde?fmtD(desde):'Inicio'} — ${hasta?fmtD(hasta):'Hoy'}</div>
+        </div>
+        <div style="text-align:right;font-size:.7rem;opacity:.6;">
+          Generado el<br><strong style="font-size:.78rem;color:#fff;">${new Date().toLocaleDateString('es-PE',{day:'2-digit',month:'long',year:'numeric'})}</strong><br>
+          ${new Date().toLocaleTimeString('es-PE',{hour:'2-digit',minute:'2-digit'})}
+        </div>
+      </div>
+    </div>
+
+    <div style="display:grid;grid-template-columns:repeat(4,1fr);gap:9px;margin-bottom:18px;">
+      ${[['Total Intervenciones',data.length,'#0d1e3a'],['Horas de Paro',hrsT.toFixed(1)+'h','#3a0808'],['Completados',comp,'#032510'],['Obs. Críticas',crits,'#3a1005']]
+        .map(([l,v,bg])=>`<div style="background:${bg};color:#fff;padding:13px;border-radius:7px;text-align:center;">
+          <div style="font-size:.54rem;text-transform:uppercase;letter-spacing:.7px;opacity:.7;margin-bottom:2px;">${l}</div>
+          <div style="font-size:1.3rem;font-weight:700;">${v}</div>
+        </div>`).join('')}
+    </div>
+
+    ${progs.length?`
+    <div style="margin-bottom:18px;">
+      <h3 style="font-size:.76rem;font-weight:700;color:#0c1020;text-transform:uppercase;letter-spacing:.7px;margin-bottom:8px;padding-bottom:5px;border-bottom:2px solid #0c1020;">
+        Próximos Mantenimientos Programados — Fechas Estimadas
+      </h3>
+      <table style="width:100%;border-collapse:collapse;font-size:.71rem;">
+        <thead><tr style="background:#0c1020;color:#b8c8de;">
+          <th style="padding:6px 9px;text-align:left;">Unidad</th>
+          <th style="padding:6px 9px;text-align:left;">Descripción</th>
+          <th style="padding:6px 9px;text-align:center;">Intervalo</th>
+          <th style="padding:6px 9px;text-align:center;">📅 Fecha Estimada</th>
+          <th style="padding:6px 9px;text-align:center;">Estado</th>
+        </tr></thead>
+        <tbody>
+        ${progs.map((r,i)=>{
+          const pf  = new Date(r.proxFecha+'T00:00:00');
+          const d   = Math.ceil((pf-hoyN)/86400000);
+          const col = d<0?'#b91c1c':d<=7?'#b45309':'#166534';
+          return `<tr style="background:${i%2===0?'#f7f9fc':'#eef1f8'};">
+            <td style="padding:6px 9px;font-weight:600;">${r.unidad}</td>
+            <td style="padding:6px 9px;">${r.proxDesc||'Mant. programado'}</td>
+            <td style="padding:6px 9px;text-align:center;font-family:monospace;">${r.intervalo} horas</td>
+            <td style="padding:6px 9px;text-align:center;font-weight:700;color:${col};">📅 ${fmtD(r.proxFecha)}</td>
+            <td style="padding:6px 9px;text-align:center;color:${col};font-weight:600;">${d<0?'VENCIDO':d===0?'HOY':d+'d'}</td>
+          </tr>`;
+        }).join('')}
+        </tbody>
+      </table>
+    </div>`:''}
+
+    <div style="margin-bottom:18px;">
+      <h3 style="font-size:.76rem;font-weight:700;color:#0c1020;text-transform:uppercase;letter-spacing:.7px;margin-bottom:8px;padding-bottom:5px;border-bottom:2px solid #0c1020;">
+        Historial de Intervenciones
+      </h3>
+      <table style="width:100%;border-collapse:collapse;font-size:.69rem;">
+        <thead><tr style="background:#0c1020;color:#b8c8de;">
+          <th style="padding:6px 9px;text-align:left;">F.Inicio</th>
+          <th style="padding:6px 9px;text-align:left;">F.Fin</th>
+          <th style="padding:6px 9px;text-align:left;">Unidad</th>
+          <th style="padding:6px 9px;text-align:left;">Tipo</th>
+          <th style="padding:6px 9px;text-align:left;">Categoría</th>
+          <th style="padding:6px 9px;text-align:left;">Supervisor</th>
+          <th style="padding:6px 9px;text-align:center;">H.Paro</th>
+          <th style="padding:6px 9px;text-align:center;">Estado</th>
+        </tr></thead>
+        <tbody>
+        ${!data.length?'<tr><td colspan="9" style="text-align:center;padding:15px;color:#888;">Sin registros en el período.</td></tr>':
+          data.map((r,i)=>`
+          <tr style="background:${i%2===0?'#f7f9fc':'#eef1f8'};">
+            <td style="padding:5px 9px;">${fmtD(r.fechaIni)} ${r.horaIni||''}</td>
+            <td style="padding:5px 9px;">${r.fechaFin?fmtD(r.fechaFin)+' '+(r.horaFin||''):'—'}</td>
+            <td style="padding:5px 9px;font-weight:600;">${r.unidad}</td>
+            <td style="padding:5px 9px;">${r.tipo}</td>
+            <td style="padding:5px 9px;font-size:.65rem;">${r.categoria||'—'}</td>
+            <td style="padding:5px 9px;">${r.supervisor||'—'}</td>
+            <td style="padding:5px 9px;text-align:center;font-weight:700;color:#b91c1c;">${r.horas}h</td>
+            <td style="padding:5px 9px;text-align:center;">${r.estado}</td>
+          </tr>
+          ${r.descripcion?`<tr style="background:#edf2ff;"><td colspan="8" style="padding:4px 9px 4px 18px;font-size:.64rem;color:#334155;font-style:italic;"><strong>Desc.:</strong> ${r.descripcion}</td></tr>`:''}
+          ${r.obs?`<tr style="background:#fff3f3;"><td colspan="8" style="padding:4px 9px 4px 18px;font-size:.64rem;color:#991b1b;"><strong>⚠ Obs.(${r.criticidad}):</strong> ${r.obs}</td></tr>`:''}
+          ${r.proxFecha?`<tr style="background:#fffce6;"><td colspan="8" style="padding:4px 9px 4px 18px;font-size:.64rem;color:#7a5000;"><strong>🔧 Próx.:</strong> ${r.proxDesc||'Mant.'} — cada ${r.intervalo} horas — 📅 ${fmtD(r.proxFecha)}</td></tr>`:''}
+          `).join('')}
+        </tbody>
+      </table>
+    </div>
+
+    ${data.filter(r=>r.fotos&&r.fotos.length).length?`
+    <div style="margin-bottom:18px;">
+      <h3 style="font-size:.76rem;font-weight:700;color:#0c1020;text-transform:uppercase;letter-spacing:.7px;margin-bottom:8px;padding-bottom:5px;border-bottom:2px solid #0c1020;">
+        Evidencia Fotográfica
+      </h3>
+      ${data.filter(r=>r.fotos&&r.fotos.length).map(r=>`
+        <div style="margin-bottom:11px;">
+          <div style="font-size:.72rem;font-weight:600;color:#0c1020;margin-bottom:5px;">${r.unidad} — ${fmtD(r.fechaIni)} (${r.tipo})</div>
+          <div style="display:flex;gap:7px;flex-wrap:wrap;">${r.fotos.map(s=>`<img src="${s}" style="width:130px;height:97px;object-fit:cover;border-radius:5px;border:1px solid #dde;">`).join('')}</div>
+        </div>`).join('')}
+    </div>`:''}
+
+    <div style="border-top:1px solid #dde;padding-top:8px;font-size:.61rem;color:#94a3b8;display:flex;justify-content:space-between;">
+      <span>Sistema de Gestión de Mantenimiento Industrial — Pacasmayo</span>
+      <span>${new Date().toLocaleString('es-PE')}</span>
+    </div>
+  </div>`;
+
+  document.getElementById('pdf-area').style.display = 'block';
+  document.getElementById('pdf-area').scrollIntoView({behavior:'smooth'});
+}
+
+// ══════════════════════════════════════════════
+// UTILS
+// ══════════════════════════════════════════════
+function showFs(fotos){ if(fotos.length) openLB(fotos[0]); }
+function openLB(src){ document.getElementById('lbimg').src=src; document.getElementById('lb').classList.add('open'); }
+function closeLB(){ document.getElementById('lb').classList.remove('open'); document.getElementById('lbimg').src=''; }
+function openOv(id){ document.getElementById(id).classList.add('open'); }
+function closeOv(id){ document.getElementById(id).classList.remove('open'); }
+
+function toast(msg, err=false){
+  const t = document.getElementById('toast');
+  t.textContent = msg;
+  t.className = 'toast '+(err?'ter':'tok');
+  t.classList.add('show');
+  setTimeout(()=>t.classList.remove('show'), 3200);
+}
+
+function exportCSV(){
+  const H = ['N','F.Inicio','H.Ini','F.Fin','H.Fin','Unidad','Codigo','Tipo','Categoria','Supervisor','Horometro','H.Paro','FP','Estado','Criticidad','Prox.Horometro','Prox.Fecha'];
+  const rows = DB.map((r,i)=>[i+1,r.fechaIni,r.horaIni,r.fechaFin,r.horaFin,r.unidad,r.codigo,r.tipo,r.categoria,r.supervisor,r.horometro,r.horas,r.sale,r.estado,r.criticidad,r.proxHoro,r.proxFecha]);
+  const csv  = [H,...rows].map(r=>r.map(v=>`"${(v||'').toString().replace(/"/g,'""')}"`).join(',')).join('\n');
+  const a    = document.createElement('a');
+  a.href     = 'data:text/csv;charset=utf-8,\uFEFF'+encodeURIComponent(csv);
+  a.download = 'mantenimiento_pacasmayo.csv';
+  a.click();
+}
+
+// Cerrar overlays al hacer clic fuera
+document.querySelectorAll('.ov').forEach(o=>o.addEventListener('click',e=>{ if(e.target===o) o.classList.remove('open'); }));
+
+// Responsive
+if(window.innerWidth<700) document.getElementById('dash2').style.gridTemplateColumns='1fr';
+
+// ══════════════════════════════════════════════════════════════
+// 🔥 FIREBASE — Base de Datos en la Nube (Firestore)
+// ══════════════════════════════════════════════════════════════
+//
+//  📋 PASOS PARA CONFIGURAR (5 min):
+//
+//  1. Ve a https://console.firebase.google.com
+//  2. Clic en "Agregar proyecto" → dale un nombre (ej: sgm-pacasmayo)
+//  3. Una vez creado → clic en "</> Web" para agregar app web
+//  4. Registra la app → copia los datos del objeto "firebaseConfig"
+//  5. En el menú izquierdo → "Firestore Database" → "Crear base de datos"
+//     → Modo producción → elegir región (ej: us-central1) → Listo
+//  6. En Firestore → pestaña "Reglas" → pega esto y publica:
+//
+//       rules_version = '2';
+//       service cloud.firestore {
+//         match /databases/{database}/documents {
+//           match /{document=**} {
+//             allow read, write: if true;
+//           }
+//         }
+//       }
+//
+//  7. Pega los valores de tu firebaseConfig aquí abajo y guarda.
+//
+//  📌 PARA SUBIR A GITHUB PAGES:
+//  1. Crea un repositorio en github.com (puede ser privado o público)
+//  2. Sube este archivo como "index.html"
+//  3. Ve a Settings → Pages → Source: main branch → / (root)
+//  4. Tu sistema estará en: https://TU_USUARIO.github.io/TU_REPO
+//     → Todos los que abran ese link verán los mismos datos en tiempo real
+//
+// ══════════════════════════════════════════════════════════════
+const FIREBASE_CONFIG = {
+  apiKey:            "AIzaSyADttAYiDIbh4T0Go1Ov1pY5oEeRdNTQjs",
+  authDomain:        "sgm-pacasmayo.firebaseapp.com",
+  projectId:         "sgm-pacasmayo",
+  storageBucket:     "sgm-pacasmayo.firebasestorage.app",
+  messagingSenderId: "399342701132",
+  appId:             "1:399342701132:web:6cdcea1e65adc8d78602e9"
+};
+// ══════════════════════════════════════════════════════════════
+
+let fbEnabled  = false;
+let fbDB       = null;
+let fbUnsub    = null;
+let fbIgnoreNext = false;  // evita loop al recibir propios cambios
+
+async function initFirebase(){
+  if(FIREBASE_CONFIG.apiKey === 'TU_API_KEY'){
+    // Mostrar banner de advertencia — Firebase sin configurar
+    const ban = document.getElementById('fb-banner');
+    if(ban) ban.style.display='flex';
+    return;
+  }
+
+  try {
+    const { initializeApp } = await import('https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js');
+    const { getFirestore, collection, onSnapshot }
+          = await import('https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js');
+
+    const app = initializeApp(FIREBASE_CONFIG);
+    fbDB      = getFirestore(app);
+    fbEnabled = true;
+
+    const lbl = document.querySelector('.honline');
+    if(lbl) lbl.innerHTML = '<div class="hdot" style="background:#f59e0b;animation:bl 1s infinite"></div>Conectando…';
+
+    // ── Escuchar en tiempo real: TODOS los documentos de la colección ──────────
+    // Cada documento = un registro de mantenimiento (id = r.id)
+    // Cuando cualquier compañero guarda, este listener lo recibe automáticamente
+    fbUnsub = onSnapshot(
+      collection(fbDB, 'mantenimientos'),
+      { includeMetadataChanges: false },
+      snap => {
+        if(fbIgnoreNext){ fbIgnoreNext = false; return; }
+        // Reconstruir DB desde Firestore (fuente de verdad única)
+        const remoto = snap.docs.map(d => d.data()).sort((a,b)=>(b.id||0)-(a.id||0));
+        // Solo actualizar si hay diferencia real (evita parpadeos)
+        if(JSON.stringify(remoto) !== JSON.stringify(DB)){
+          DB = remoto;
+          save();
+          renderDash();
+          // Si historial está visible, actualizarlo también
+          if(document.getElementById('tab-historial').classList.contains('active')) renderHist();
+        }
+        const lbl2 = document.querySelector('.honline');
+        if(lbl2) lbl2.innerHTML = '<div class="hdot"></div>🔥 Sincronizado';
+        // Ocultar banner de advertencia
+        const ban = document.getElementById('fb-banner');
+        if(ban) ban.style.display='none';
+      },
+      err => {
+        console.warn('Firestore error:', err);
+        const lbl2 = document.querySelector('.honline');
+        if(lbl2) lbl2.innerHTML = '<div class="hdot" style="background:var(--rd);"></div>Sin conexión';
+        const ban2 = document.getElementById('fb-banner');
+        if(ban2) ban2.style.display='flex';
+      }
+    );
+
+  } catch(e){
+    console.warn('Firebase init error:', e);
+    const lbl = document.querySelector('.honline');
+    if(lbl) lbl.innerHTML = '<div class="hdot" style="background:var(--rd);"></div>Error Firebase';
+  }
+}
+
+// ── Guardar UN solo registro en Firestore (no borra los demás) ────────────────
+async function fbWriteOne(registro){
+  if(!fbEnabled || !fbDB) return;
+  try {
+    const { doc, setDoc, collection }
+          = await import('https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js');
+    fbIgnoreNext = true;
+    await setDoc(doc(collection(fbDB,'mantenimientos'), String(registro.id)), registro);
+  } catch(e){ console.warn('fbWriteOne error:', e); toast('⚠ Error al guardar en Firebase',true); }
+}
+
+// ── Borrar UN solo registro de Firestore ─────────────────────────────────────
+async function fbDeleteOne(id){
+  if(!fbEnabled || !fbDB) return;
+  try {
+    const { doc, deleteDoc, collection }
+          = await import('https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js');
+    fbIgnoreNext = true;
+    await deleteDoc(doc(collection(fbDB,'mantenimientos'), String(id)));
+  } catch(e){ console.warn('fbDeleteOne error:', e); }
+}
+
+// ── Parchear funciones que modifican datos ────────────────────────────────────
+const _guardar  = guardar;
+guardar = function(){
+  _guardar();
+  // El último elemento insertado está en DB[0] (se hace unshift)
+  fbWriteOne(DB[0]);
+};
+
+const _delReg = delReg;
+delReg = function(idx){
+  const idBorrado = DB[idx]?.id;
+  _delReg(idx);
+  if(idBorrado) fbDeleteOne(idBorrado);
+};
+
+const _saveEdit = saveEdit;
+saveEdit = function(){
+  if(editIdx < 0) return;
+  const idEditado = DB[editIdx]?.id;
+  _saveEdit();
+  // Buscar el registro editado (editIdx puede haber cambiado, buscamos por id)
+  const r = DB.find(x => x.id === idEditado);
+  if(r) fbWriteOne(r);
+};
+
+// Arrancar Firebase
+initFirebase();
+</script>
+</body>
+</html>
